@@ -7,6 +7,7 @@ spec:
     - name: prepare-greeting-step
       taskRef:
         name: prepare-greeting-task
+        
     - name: display-goodbye-step
       taskRef:
         name: display-goodbye-task
