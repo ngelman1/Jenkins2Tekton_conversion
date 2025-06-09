@@ -1,0 +1,16 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: display-goodbye-task
+spec:
+  params:
+    - name: incoming-greeting
+      description: The greeting message received from a previous task
+      type: string
+  steps:
+    - name: display-and-say-goodbye
+      image: ubuntu:latest
+      script: |
+        #!/usr/bin/env bash
+        echo "$(params.incoming-greeting)"
+        echo "Now, goodbye from Stage 2!"
