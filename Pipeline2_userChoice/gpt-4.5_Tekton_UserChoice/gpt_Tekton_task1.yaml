@@ -1,0 +1,40 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: apply-transformation
+spec:
+  params:
+    - name: transformation
+      type: string
+    - name: input-message
+      type: string
+  results:
+    - name: output-message
+  steps:
+    - name: transform
+      image: ubuntu:latest
+      script: |
+        #!/bin/bash
+
+        set -e
+
+        transformation="$(params.transformation)"
+        input="$(params.input-message)"
+
+        echo "Transformation chosen: $transformation"
+        echo "Original message: $input"
+
+        result=""
+
+        if [ "$transformation" = "Uppercase" ]; then
+          result=$(echo "$input" | tr '[:lower:]' '[:upper:]')
+        elif [ "$transformation" = "Reverse Words" ]; then
+          result=$(echo "$input" | awk '{ for(i=NF;i>0;i--) printf("%s ", $i); print "" }')
+        elif [ "$transformation" = "CamelCase" ]; then
+          result=$(echo "$input" | sed -E 's/(^| )([a-z])/\U\2/g' | tr -d ' ')
+        else
+          result="ERROR: Unknown transformation '$transformation'."
+        fi
+
+        echo "Transformed message: $result"
+        echo -n "$result" > $(results.output-message.path)
