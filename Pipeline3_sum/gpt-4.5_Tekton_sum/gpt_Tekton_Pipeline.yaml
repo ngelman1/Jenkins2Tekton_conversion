@@ -1,0 +1,27 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: process-numbers-pipeline
+spec:
+  tasks:
+    - name: define-data
+      taskRef:
+        name: define-number-data
+
+    - name: calculate-sum
+      runAfter: ["define-data"]
+      taskRef:
+        name: calculate-sum
+      params:
+        - name: number-string
+          value: $(tasks.define-data.results.number-string)
+
+    - name: format-final
+      runAfter: ["calculate-sum"]
+      taskRef:
+        name: format-final-string
+      params:
+        - name: number-string
+          value: $(tasks.define-data.results.number-string)
+        - name: calculated-sum
+          value: $(tasks.calculate-sum.results.calculated-sum)

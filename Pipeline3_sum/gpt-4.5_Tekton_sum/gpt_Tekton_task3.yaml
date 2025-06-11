@@ -1,0 +1,19 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: format-final-string
+spec:
+  params:
+    - name: number-string
+    - name: calculated-sum
+  results:
+    - name: final-message
+      description: Formatted final result
+  steps:
+    - name: format
+      image: ubuntu:latest
+      script: |
+        #!/bin/bash
+        formatted="Original Numbers: [$(params.number-string)] | Total Sum: $(params.calculated-sum)"
+        echo "Formatted String: $formatted"
+        echo -n "$formatted" > $(results.final-message.path)

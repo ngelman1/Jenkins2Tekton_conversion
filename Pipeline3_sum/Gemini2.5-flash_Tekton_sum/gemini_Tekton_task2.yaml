@@ -1,0 +1,29 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: format-result-task
+spec:
+  params:
+    - name: original-numbers
+      description: The original comma-separated string of numbers.
+      type: string
+    - name: sum-value
+      description: The calculated sum.
+      type: string
+  results:
+    - name: final-formatted-string
+      description: The final string combining original numbers and sum.
+  steps:
+    - name: format-string
+      image: ubuntu:latest 
+      script: |
+        #!/usr/bin/env bash
+        set -euo pipefail
+
+        ORIGINAL_NUMBERS="$(params.original-numbers)"
+        SUM_VALUE="$(params.sum-value)"
+
+        echo "Formatting final output string..."
+        FINAL_STRING="Original Numbers: [${ORIGINAL_NUMBERS}] | Total Sum: ${SUM_VALUE}"
+        echo "Formatted String: ${FINAL_STRING}"
+        echo -n "${FINAL_STRING}" > "$(results.final-formatted-string.path)"

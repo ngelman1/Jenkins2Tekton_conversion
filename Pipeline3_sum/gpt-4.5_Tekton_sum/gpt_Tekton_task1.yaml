@@ -1,0 +1,17 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: define-number-data
+spec:
+  results:
+    - name: number-string
+      description: Comma-separated string of numbers
+  steps:
+    - name: echo-input
+      image: ubuntu:latest
+      script: |
+        #!/bin/bash
+        echo "--- Input Number Data ---"
+        echo "Numbers to process: 10,25,5,15,30"
+        echo "-------------------------"
+        echo -n "10,25,5,15,30" > $(results.number-string.path)

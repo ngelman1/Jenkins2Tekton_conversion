@@ -1,0 +1,7 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  generateName: process-numbers-run-
+spec:
+  pipelineRef:
+    name: process-numbers-pipeline

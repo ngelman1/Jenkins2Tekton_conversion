@@ -1,0 +1,32 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: calculate-sum-task
+spec:
+  params:
+    - name: numbers-string
+      description: The comma-separated string of numbers.
+      type: string
+  results:
+    - name: calculated-sum
+      description: The total sum of the numbers.
+  steps:
+    - name: calculate-sum
+      image: ubuntu:latest 
+      script: |
+        #!/usr/bin/env bash
+        set -euo pipefail
+
+        INPUT_NUMBERS="$(params.numbers-string)"
+        SUM=0
+
+        echo "Calculating sum of numbers from: ${INPUT_NUMBERS}"
+
+        # Split the string by comma and iterate
+        IFS=',' read -ra ADDR <<< "$INPUT_NUMBERS"
+        for i in "${ADDR[@]}"; do
+          SUM=$((SUM + i))
+        done
+
+        echo "Calculated Sum: ${SUM}"
+        echo -n "${SUM}" > "$(results.calculated-sum.path)"

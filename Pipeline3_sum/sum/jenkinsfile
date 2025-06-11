@@ -1,0 +1,62 @@
+// This Pipeline processes a fixed string of numbers:
+// - Extracts the individual numbers.
+// - Calculates their sum.
+// - Formats the result into a final string.
+
+pipeline {
+    agent any
+
+    environment {
+        NUMBER_STRING_DATA = "10,25,5,15,30"
+        CALCULATED_SUM = 0
+        FINAL_RESULT_STRING = ''
+    }
+
+    stages {
+        stage('Define Data') {
+            steps {
+                script {
+                    echo "--- Input Number Data ---"
+                    echo "Numbers to process: ${env.NUMBER_STRING_DATA}"
+                    echo "-------------------------"
+                }
+            }
+        }
+
+        stage('Calculate Sum') {
+            steps {
+                script {
+                    echo "Calculating sum of numbers..."
+                    def numbers = env.NUMBER_STRING_DATA.split(',')
+                    def sum = 0
+                    numbers.each { num ->
+                        sum += num.toInteger() 
+                    }
+                    env.CALCULATED_SUM = sum
+                    echo "Calculated Sum: ${env.CALCULATED_SUM}"
+                }
+            }
+        }
+
+        stage('Format Final String') {
+            steps {
+                script {
+                    echo "Formatting final output string..."
+                    env.FINAL_RESULT_STRING = "Original Numbers: [${env.NUMBER_STRING_DATA}] | Total Sum: ${env.CALCULATED_SUM}"
+                    echo "Formatted String: ${env.FINAL_RESULT_STRING}"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                echo "--- Raw Final String for Cross-Platform SHA Hashing ---"
+                echo "${env.FINAL_RESULT_STRING}"
+                echo "------------------------------------------------------"
+
+            }
+        }
+    }
+}
