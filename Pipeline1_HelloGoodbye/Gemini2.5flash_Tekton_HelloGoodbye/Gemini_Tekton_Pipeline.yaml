@@ -1,0 +1,36 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: greeting-pipeline
+spec:
+  tasks:
+    - name: create-greeting
+      taskRef:
+        name: create-greeting-task
+    - name: append-greeting
+      taskRef:
+        name: append-greeting-task
+      runAfter:
+        - create-greeting # Ensures this task runs after 'create-greeting'
+      params:
+        - name: previous-greeting
+          value: $(tasks.create-greeting.results.initial-greeting) # Pass result as param
+
+  # The 'post' section in Jenkins is similar to a 'finally' block in Tekton.
+  # These tasks run regardless of whether previous tasks succeeded or failed.
+  finally:
+    - name: print-final-message
+      taskSpec: # You can embed a TaskSpec directly for simple tasks
+        params:
+          - name: message-to-print
+            description: The final message to display.
+            type: string
+        steps:
+          - name: echo-final
+            image: ubuntu:latest
+            script: |
+              #!/usr/bin/env bash
+              echo "Final Message: $(params.message-to-print)"
+      params:
+        - name: message-to-print
+          value: $(tasks.append-greeting.results.final-greeting) # Access the final result

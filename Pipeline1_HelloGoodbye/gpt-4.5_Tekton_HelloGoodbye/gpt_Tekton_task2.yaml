@@ -1,0 +1,16 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: append-greeting
+spec:
+  params:
+    - name: input-message
+      type: string
+  results:
+    - name: final-message
+  steps:
+    - name: append
+      image: ubuntu:latest
+      script: |
+        #!/bin/bash
+        echo -n "$(params.input-message) Goodbye from Stage 2!" > $(results.final-message.path)

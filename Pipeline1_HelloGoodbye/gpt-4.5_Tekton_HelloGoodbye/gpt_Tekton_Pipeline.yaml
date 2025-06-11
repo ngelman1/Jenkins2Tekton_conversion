@@ -1,0 +1,26 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: greeting-pipeline
+spec:
+  tasks:
+    - name: create-greeting
+      taskRef:
+        name: create-greeting
+
+    - name: append-greeting
+      runAfter:
+        - create-greeting
+      taskRef:
+        name: append-greeting
+      params:
+        - name: input-message
+          value: $(tasks.create-greeting.results.message)
+
+  finally:
+    - name: show-final-message
+      taskRef:
+        name: show-final-message
+      params:
+        - name: message
+          value: $(tasks.append-greeting.results.final-message)

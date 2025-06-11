@@ -1,0 +1,16 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: create-greeting-task
+spec:
+  results:
+    - name: initial-greeting
+      description: The initial greeting message.
+  steps:
+    - name: set-initial-message
+      image: ubuntu:latest # Or any image with bash
+      script: |
+        #!/usr/bin/env bash
+        INITIAL_MESSAGE="Hello from Stage 1!"
+        echo "Stage 1 Message: ${INITIAL_MESSAGE}"
+        echo -n "${INITIAL_MESSAGE}" > "$(results.initial-greeting.path)"

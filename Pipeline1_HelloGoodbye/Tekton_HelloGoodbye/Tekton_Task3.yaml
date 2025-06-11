@@ -1,0 +1,11 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: pipeline-finished-task
+spec:
+  steps:
+    - name: final-message
+      image: ubuntu:latest
+      script: |
+        #!/usr/bin/env bash
+        echo "Pipeline finished."

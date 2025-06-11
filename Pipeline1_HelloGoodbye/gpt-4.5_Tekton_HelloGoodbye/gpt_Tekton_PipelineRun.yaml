@@ -1,0 +1,7 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: greeting-pipeline-run
+spec:
+  pipelineRef:
+    name: greeting-pipeline

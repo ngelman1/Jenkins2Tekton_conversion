@@ -1,0 +1,14 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: show-final-message
+spec:
+  params:
+    - name: message
+      type: string
+  steps:
+    - name: show
+      image: ubuntu:latest
+      script: |
+        #!/bin/bash
+        echo "Final Message: $(params.message)"

@@ -1,0 +1,65 @@
+pipeline {
+    agent any
+
+    environment {
+        FINAL_MESSAGE = ''
+    }
+
+    stages {
+        stage('Create Greeting') {
+            steps {
+                script {
+                    // Set initial message
+                    env.FINAL_MESSAGE = "Hello from Stage 1!"
+                    echo "Stage 1 Message: ${env.FINAL_MESSAGE}"
+                }
+            }
+        }
+
+        stage('Append to Greeting') {
+            steps {
+                script {
+                    // Append message
+                    env.FINAL_MESSAGE = "${env.FINAL_MESSAGE} Goodbye from Stage 2!"
+                    echo "Stage 2 Appended Message: ${env.FINAL_MESSAGE}"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                // Print the final string
+                echo "Final Message: ${env.FINAL_MESSAGE}"
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
