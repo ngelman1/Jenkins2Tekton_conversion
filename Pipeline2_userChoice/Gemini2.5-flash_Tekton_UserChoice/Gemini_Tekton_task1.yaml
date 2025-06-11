@@ -1,0 +1,70 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: transform-string-task
+spec:
+  params:
+    - name: user-transformation-choice
+      description: The transformation chosen by the user (Uppercase, Reverse Words, CamelCase).
+      type: string
+    - name: initial-message
+      description: The starting string to be transformed.
+      type: string
+      default: "The quick brown fox jumps over the lazy dog." # Matches Jenkins default
+  results:
+    - name: final-processed-string
+      description: The string after applying the chosen transformation.
+  steps:
+    - name: apply-transformation
+      image: bash:latest # Using a minimal bash image for string manipulation
+      script: |
+        #!/usr/bin/env bash
+        set -euo pipefail
+
+        CHOICE="$(params.user-transformation-choice)"
+        INITIAL_MESSAGE="$(params.initial-message)"
+        PROCESSED_MESSAGE="${INITIAL_MESSAGE}"
+
+        echo "Applying transformation '${CHOICE}' to string: '${INITIAL_MESSAGE}'"
+
+        case "${CHOICE}" in
+          "Uppercase")
+            PROCESSED_MESSAGE=$(echo -n "${INITIAL_MESSAGE}" | tr '[:lower:]' '[:upper:]')
+            echo "String after Uppercase: ${PROCESSED_MESSAGE}"
+            ;;
+          "Reverse Words")
+            # Bash doesn't have easy string reversal.
+            # We'll split, put into an array, reverse array elements, then join.
+            # This is a bit more complex in pure bash.
+            read -ra words <<< "${INITIAL_MESSAGE}"
+            REVERSED_WORDS=""
+            for (( i=${#words[@]}-1; i>=0; i-- )); do
+                REVERSED_WORDS+="${words[i]} "
+            done
+            PROCESSED_MESSAGE="${REVERSED_WORDS% }" # Remove trailing space
+            echo "String after Reverse Words: ${PROCESSED_MESSAGE}"
+            ;;
+          "CamelCase")
+            # CamelCase in bash is also not trivial.
+            # We'll use awk to capitalize first letter of each word and remove spaces.
+            # This approach assumes words are space-separated.
+            PROCESSED_MESSAGE=$(echo "${INITIAL_MESSAGE}" | awk '{
+              output = ""
+              for (i=1; i<=NF; i++) {
+                word = $i
+                if (word != "") {
+                  output = output toupper(substr(word,1,1)) tolower(substr(word,2))
+                }
+              }
+              print output
+            }')
+            echo "String after CamelCase: ${PROCESSED_MESSAGE}"
+            ;;
+          *)
+            PROCESSED_MESSAGE="ERROR: Unknown choice '${CHOICE}'. Original string: '${INITIAL_MESSAGE}'"
+            echo "String after Error: ${PROCESSED_MESSAGE}"
+            ;;
+        esac
+
+        # Output the final processed message as a Task result
+        echo -n "${PROCESSED_MESSAGE}" > "$(results.final-processed-string.path)"

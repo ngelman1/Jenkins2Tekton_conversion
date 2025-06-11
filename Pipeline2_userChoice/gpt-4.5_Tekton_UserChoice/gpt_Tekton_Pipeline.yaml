@@ -1,0 +1,28 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: string-transform-pipeline
+spec:
+  params:
+    - name: transformation
+      type: string
+    - name: input-message
+      type: string
+      default: "The quick brown fox jumps over the lazy dog."
+  tasks:
+    - name: apply-transformation
+      taskRef:
+        name: apply-transformation
+      params:
+        - name: transformation
+          value: $(params.transformation)
+        - name: input-message
+          value: $(params.input-message)
+
+  finally:
+    - name: show-final-message
+      taskRef:
+        name: show-final-message
+      params:
+        - name: final-message
+          value: $(tasks.apply-transformation.results.output-message)

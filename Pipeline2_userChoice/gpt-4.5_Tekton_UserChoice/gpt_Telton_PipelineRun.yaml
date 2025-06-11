@@ -1,0 +1,12 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: string-transform-run
+spec:
+  pipelineRef:
+    name: string-transform-pipeline
+  params:
+    - name: transformation
+      value: "CamelCase"  # Change to Uppercase, Reverse Words, or CamelCase
+    - name: input-message
+      value: "The quick brown fox jumps over the lazy dog."

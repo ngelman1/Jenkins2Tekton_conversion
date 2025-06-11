@@ -1,0 +1,86 @@
+//This Pipeline takes an input from the user and will perform some action on the string accordingly.
+// The final string to run sha on will be directly from the "Apply Chosen Transformation" stage.
+
+pipeline {
+    agent any
+
+    environment {
+        // Variable to hold the user's choice from the dropdown
+        USER_TRANSFORMATION_CHOICE = ''
+        // Variable for the message that will be processed
+        PROCESSING_MESSAGE = 'The quick brown fox jumps over the lazy dog.' // Start with a fixed initial string
+    }
+
+    stages {
+        stage('Get User Transformation Choice') {
+            steps {
+                script {
+                    def userInput = input(
+                        id: 'getChoiceInput',
+                        message: 'Select a transformation to apply:',
+                        parameters: [
+                            choice(
+                                name: 'TRANSFORMATION_TYPE',
+                                choices: ['Uppercase', 'Reverse Words', 'CamelCase'], 
+                                description: 'Choose how to transform the string.'
+                            )
+                        ]
+                    )
+                    env.USER_TRANSFORMATION_CHOICE = userInput.TRANSFORMATION_TYPE
+                    echo "User chose: '${env.USER_TRANSFORMATION_CHOICE}'"
+
+                    echo "Initial string: '${env.PROCESSING_MESSAGE}'"
+                }
+            }
+        }
+
+        stage('Apply Chosen Transformation') {
+            steps {
+                script {
+                    def currentMessage = env.PROCESSING_MESSAGE
+                    def choice = env.USER_TRANSFORMATION_CHOICE
+
+                    echo "Applying transformation '${choice}' to string: '${currentMessage}'"
+
+                    // Conditional logic based on the user's dropdown choice
+                    if (choice == 'Uppercase') {
+                        env.PROCESSING_MESSAGE = currentMessage.toUpperCase()
+                        echo "String after Uppercase: ${env.PROCESSING_MESSAGE}"
+                    } else if (choice == 'Reverse Words') {
+                        // Split by space, reverse the order of words, then join back
+                        def words = currentMessage.split(' ')
+                        env.PROCESSING_MESSAGE = words.reverse().join(' ')
+                        echo "String after Reverse Words: ${env.PROCESSING_MESSAGE}"
+                    } else if (choice == 'CamelCase') {
+                        // Simple CamelCase: Capitalize the first letter of each word and remove spaces
+                        def words = currentMessage.split(' ')
+                        def camelCaseWords = []
+                        words.each { word ->
+                            if (word) { // Ensure word is not empty
+                                camelCaseWords.add(word.capitalize())
+                            }
+                        }
+                        env.PROCESSING_MESSAGE = camelCaseWords.join('')
+                        echo "String after CamelCase: ${env.PROCESSING_MESSAGE}"
+                    } else {
+                        // Fallback for an unexpected choice (should not happen with 'choice' parameter)
+                        env.PROCESSING_MESSAGE = "ERROR: Unknown choice '${choice}'. Original string: '${currentMessage}'"
+                        echo "String after Error: ${env.PROCESSING_MESSAGE}"
+                    }
+                }
+            }
+        }
+
+    }
+
+    post {
+        always {
+            script {
+                echo "--- Raw Final String for Cross-Platform SHA Hashing ---"
+                echo "${env.PROCESSING_MESSAGE}"
+                echo "------------------------------------------------------"
+
+            }
+        }
+    }
+}
