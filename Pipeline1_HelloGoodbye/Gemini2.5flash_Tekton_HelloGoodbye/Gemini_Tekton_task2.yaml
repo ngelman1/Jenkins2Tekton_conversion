@@ -1,17 +1,21 @@
-# display-goodbye-task.yaml
 apiVersion: tekton.dev/v1
 kind: Task
 metadata:
-  name: display-goodbye-task
+  name: append-greeting-task
 spec:
   params:
-    - name: incoming-greeting
-      description: The greeting message passed from a previous task.
+    - name: previous-greeting
+      description: The greeting message from the previous task.
       type: string
+  results:
+    - name: final-greeting
+      description: The appended greeting message.
   steps:
-    - name: display-and-say-goodbye
-      image: ubuntu:latest # Or any suitable base image
+    - name: append-message
+      image: ubuntu:latest # Or any image with bash
       script: |
         #!/usr/bin/env bash
-        echo "$(params.incoming-greeting)"
-        echo "Now, goodbye from Stage 2!"
+        PREVIOUS_MESSAGE=$(params.previous-greeting)
+        FINAL_MESSAGE="${PREVIOUS_MESSAGE} Goodbye from Stage 2!"
+        echo "Stage 2 Appended Message: ${FINAL_MESSAGE}"
+        echo -n "${FINAL_MESSAGE}" > "$(results.final-greeting.path)"

@@ -1,7 +1,0 @@
-apiVersion: tekton.dev/v1
-kind: PipelineRun
-metadata:
-  name: hello-goodbye-run-1
-spec:
-  pipelineRef:
-    name: hello-goodbye-pipeline

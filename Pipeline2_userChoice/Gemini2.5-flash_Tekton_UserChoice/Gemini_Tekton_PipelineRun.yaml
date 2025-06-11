@@ -1,0 +1,10 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  generateName: transform-uppercase-run-
+spec:
+  pipelineRef:
+    name: string-transformation-pipeline
+  params:
+    - name: chosen-transformation
+      value: "Uppercase" # User's choice from the 'dropdown'
