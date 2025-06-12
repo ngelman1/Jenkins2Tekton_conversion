@@ -1,0 +1,52 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: greeting-pipeline
+spec:
+  tasks:
+    - name: create-greeting
+      taskSpec:
+        params:
+          - name: message
+            value: "Hello from Stage 1!"
+        steps:
+          - name: set-message
+            image: alpine/alpine:latest
+            script: |
+              echo $(params.message) > /workingdir/message
+    - name: append-to-greeting
+      taskSpec:
+        params:
+          - name: message
+            value: "Goodbye from Stage 2!"
+        steps:
+          - name: append-message
+            image: alpine/alpine:latest
+            script: |
+              echo $(params.message) >> /workingdir/message
+    - name: print-final-message
+      taskSpec:
+        params:
+          - name: message
+            value: ""
+        steps:
+          - name: get-message
+            image: alpine/alpine:latest
+            command: ["sh", "-c"]
+            args:
+              - |
+                echo $(params.message)
+    - name: join-tasks
+      taskSpec:
+        steps:
+          - name: combine-messages
+            image: alpine/alpine:latest
+            script: |
+              cat /workingdir/message >> $(params.outputMessage)
+# Output from 'join-tasks' task will be used in the final print step
+  params:
+    - name: outputMessage
+      value: ""
+  workspaces:
+    - name: workingdir
+# Create a pipeline run with the above pipeline and 3 workspace volumes named 'workingdir'
