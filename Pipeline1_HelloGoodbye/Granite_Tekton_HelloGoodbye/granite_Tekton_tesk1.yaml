@@ -1,0 +1,18 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+resources:
+  - name: create-greeting-task
+    spec:
+      container:
+        image: alpine:latest
+        command:
+          - /bin/sh
+          - -c
+        args:
+          - |
+            echo 'export FINAL_MESSAGE="Hello from Stage 1!"' > /tekton/results
+            tee /tekton/params/FINAL_MESSAGE > /dev/null || true
+      volumes:
+        - name: params-volume
+          persistentVolumeClaim:
+            claimName: pvc-tekton-params
