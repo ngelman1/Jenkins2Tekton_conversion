@@ -3,14 +3,11 @@ kind: Task
 metadata:
   name: append-greeting
 spec:
-  params:
-    - name: input-message
-      type: string
-  results:
-    - name: final-message
+  workspaces:
+    - name: shared-data
   steps:
     - name: append
-      image: ubuntu:latest
+      image: alpine
       script: |
-        #!/bin/bash
-        echo -n "$(params.input-message) Goodbye from Stage 2!" > $(results.final-message.path)
+        #!/bin/sh
+        echo " Goodbye from Stage 2!" >> $(workspaces.shared-data.path)/message.txt

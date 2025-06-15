@@ -5,3 +5,13 @@ metadata:
 spec:
   pipelineRef:
     name: greeting-pipeline
+  workspaces:
+    - name: shared-data
+      volumeClaimTemplate:
+        metadata:
+          name: shared-data-pvc
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 1Gi

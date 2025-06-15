@@ -3,11 +3,11 @@ kind: Task
 metadata:
   name: create-greeting
 spec:
-  results:
-    - name: message
+  workspaces:
+    - name: shared-data
   steps:
-    - name: create
-      image: ubuntu:latest
+    - name: write-greeting
+      image: alpine
       script: |
-        #!/bin/bash
-        echo -n "Hello from Stage 1!" > $(results.message.path)
+        #!/bin/sh
+        echo "Hello from Stage 1!" > $(workspaces.shared-data.path)/message.txt

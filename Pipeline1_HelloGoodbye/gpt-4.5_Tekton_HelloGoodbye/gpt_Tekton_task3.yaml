@@ -1,14 +1,14 @@
 apiVersion: tekton.dev/v1
 kind: Task
 metadata:
-  name: show-final-message
+  name: print-message
 spec:
-  params:
-    - name: message
-      type: string
+  workspaces:
+    - name: shared-data
   steps:
-    - name: show
-      image: ubuntu:latest
+    - name: print
+      image: alpine
       script: |
-        #!/bin/bash
-        echo "Final Message: $(params.message)"
+        #!/bin/sh
+        echo "Final message:"
+        cat $(workspaces.shared-data.path)/message.txt

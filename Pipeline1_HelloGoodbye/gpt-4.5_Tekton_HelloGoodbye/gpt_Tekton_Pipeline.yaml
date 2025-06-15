@@ -3,24 +3,28 @@ kind: Pipeline
 metadata:
   name: greeting-pipeline
 spec:
+  workspaces:
+    - name: shared-data
   tasks:
-    - name: create-greeting
+    - name: create
       taskRef:
         name: create-greeting
+      workspaces:
+        - name: shared-data
+          workspace: shared-data
 
-    - name: append-greeting
-      runAfter:
-        - create-greeting
+    - name: append
+      runAfter: [create]
       taskRef:
         name: append-greeting
-      params:
-        - name: input-message
-          value: $(tasks.create-greeting.results.message)
+      workspaces:
+        - name: shared-data
+          workspace: shared-data
 
-  finally:
-    - name: show-final-message
+    - name: print
+      runAfter: [append]
       taskRef:
-        name: show-final-message
-      params:
-        - name: message
-          value: $(tasks.append-greeting.results.final-message)
+        name: print-message
+      workspaces:
+        - name: shared-data
+          workspace: shared-data
