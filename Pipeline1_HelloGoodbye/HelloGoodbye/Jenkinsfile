@@ -2,15 +2,20 @@ pipeline {
     agent any
 
     environment {
-        FINAL_MESSAGE = ''
+        // Initialize here, but the actual value will be set in the script block
+        FINAL_MESSAGE = '' 
     }
 
     stages {
         stage('Create Greeting') {
             steps {
                 script {
-                    // Set initial message
-                    env.FINAL_MESSAGE = "Hello from Stage 1!"
+                    def tempMessage = "Hello from Stage 1!"
+                    
+                    env.FINAL_MESSAGE = tempMessage
+                    
+                    echo "Diagnostic: tempMessage inside script: ${tempMessage}"
+                    // Check the environment variable's value immediately after assignment
                     echo "Stage 1 Message: ${env.FINAL_MESSAGE}"
                 }
             }
@@ -19,8 +24,11 @@ pipeline {
         stage('Append to Greeting') {
             steps {
                 script {
+                    // Explicitly retrieve the current value from env
+                    def currentMessage = env.FINAL_MESSAGE 
+
                     // Append message
-                    env.FINAL_MESSAGE = "${env.FINAL_MESSAGE} Goodbye from Stage 2!"
+                    env.FINAL_MESSAGE = "${currentMessage} Goodbye from Stage 2!"
                     echo "Stage 2 Appended Message: ${env.FINAL_MESSAGE}"
                 }
             }
@@ -30,10 +38,8 @@ pipeline {
     post {
         always {
             script {
-                // Print the final string
                 echo "Final Message: ${env.FINAL_MESSAGE}"
             }
         }
     }
 }
-
