@@ -1,32 +1,33 @@
+// Shared variable outside pipeline block
+def finalMessage = ''
+
 pipeline {
     agent any
 
-    environment {
-        GREETING_MESSAGE = ''
+    stages {
+        stage('Create Greeting') {
+            steps {
+                script {
+                    finalMessage = "Hello from Stage 1!"
+                    echo "Stage 1 Message: ${finalMessage}"
+                }
+            }
+        }
+
+        stage('Append to Greeting') {
+            steps {
+                script {
+                    finalMessage += " Goodbye from Stage 2!"
+                    echo "Stage 2 Message: ${finalMessage}"
+                }
+            }
+        }
     }
 
-    stages {
-        stage('Stage 1 - Create Greeting') {
-            steps {
-                script {
-                    GREETING_MESSAGE = 'hello from first stage'
-                    echo "Stage 1 message: ${GREETING_MESSAGE}"
-                }
-            }
-        }
-
-        stage('Stage 2 - Append Message') {
-            steps {
-                script {
-                    GREETING_MESSAGE += ' goodbye from task 2'
-                    echo "Stage 2 updated message: ${GREETING_MESSAGE}"
-                }
-            }
-        }
-
-        stage('Final Stage - Print Message') {
-            steps {
-                echo "Final message: ${GREETING_MESSAGE}"
+    post {
+        always {
+            script {
+                echo "Final Message: ${finalMessage}"
             }
         }
     }
