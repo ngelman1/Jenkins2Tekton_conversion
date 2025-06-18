@@ -1,15 +1,14 @@
-apiVersion: tekton.dev/v1
+apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
   name: greeting-pipeline-run
 spec:
   pipelineRef:
     name: greeting-pipeline
+  serviceAccountName: pipeline-runner
   workspaces:
     - name: shared-data
       volumeClaimTemplate:
-        metadata:
-          name: shared-data-pvc
         spec:
           accessModes: ["ReadWriteOnce"]
           resources:

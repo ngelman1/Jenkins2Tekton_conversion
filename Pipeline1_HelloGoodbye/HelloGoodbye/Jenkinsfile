@@ -1,4 +1,3 @@
-// Shared variable outside pipeline block
 def finalMessage = ''
 
 pipeline {
@@ -22,12 +21,26 @@ pipeline {
                 }
             }
         }
+
+        stage('SHA-1 Hashing') {
+            steps {
+                script {
+                    def sha1 = java.security.MessageDigest
+                        .getInstance("SHA-1")
+                        .digest(finalMessage.bytes)
+                        .encodeHex()
+                        .toString()
+
+                    echo "SHA-1 of final message: ${sha1}"
+                }
+            }
+        }
     }
 
     post {
         always {
             script {
-                echo "Final Message: ${finalMessage}"
+                echo "Final Message (before hashing): ${finalMessage}"
             }
         }
     }
