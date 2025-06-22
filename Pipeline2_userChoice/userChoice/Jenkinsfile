@@ -14,8 +14,6 @@ pipeline {
     stages {
 
 
-
-
         stage('Get User Transformation Choice') {
             steps {
                 script {
@@ -33,9 +31,9 @@ pipeline {
                     echo "DIAGNOSTIC: Raw input result: '${rawInputResult}'"
                     echo "DIAGNOSTIC: Type of rawInputResult: ${rawInputResult.getClass()}"
 
-                    // --- THIS IS THE FINAL FIX ---
-                    env.USER_TRANSFORMATION_CHOICE = rawInputResult // Directly assign the string
-                    // --- END FINAL FIX ---
+                
+                    env.USER_TRANSFORMATION_CHOICE = rawInputResult.toString()
+                    
 
                     echo "User chose: '${env.USER_TRANSFORMATION_CHOICE}'"
 
@@ -43,6 +41,7 @@ pipeline {
                 }
             }
         }
+
 
 
         stage('Apply Chosen Transformation') {
