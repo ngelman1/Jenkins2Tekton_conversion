@@ -12,6 +12,8 @@ pipeline {
     }
 
     stages {
+
+
         stage('Get User Transformation Choice') {
             steps {
                 script {
@@ -21,11 +23,15 @@ pipeline {
                         parameters: [
                             choice(
                                 name: 'TRANSFORMATION_TYPE',
-                                choices: ['Uppercase', 'Reverse Words', 'CamelCase'], 
+                                choices: ['Uppercase', 'Reverse Words', 'CamelCase'],
                                 description: 'Choose how to transform the string.'
                             )
                         ]
                     )
+                    // --- ADD THIS DIAGNOSTIC LINE ---
+                    echo "DIAGNOSTIC: Type of userInput: ${userInput.getClass()}"
+                    // --- END DIAGNOSTIC LINE ---
+
                     env.USER_TRANSFORMATION_CHOICE = userInput['TRANSFORMATION_TYPE']
                     echo "User chose: '${env.USER_TRANSFORMATION_CHOICE}'"
 
