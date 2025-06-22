@@ -26,7 +26,7 @@ pipeline {
                             )
                         ]
                     )
-                    env.USER_TRANSFORMATION_CHOICE = userInput.TRANSFORMATION_TYPE
+                    env.USER_TRANSFORMATION_CHOICE = userInput['TRANSFORMATION_TYPE']
                     echo "User chose: '${env.USER_TRANSFORMATION_CHOICE}'"
 
                     echo "Initial string: '${env.PROCESSING_MESSAGE}'"

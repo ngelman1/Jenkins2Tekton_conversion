@@ -1,4 +1,13 @@
+#!/bin/bash
+set -x # ADD THIS LINE
 
+# A reusable script to install Tekton, apply resources from a specific
+# directory, and stream the logs of the PipelineRun found within.
+# VERSION 4: Includes Pod Security Admission labeling for new clusters.
+# FIX: More precise awk to find PipelineRun name (v2025-06-22)
+# DEBUG FIX: Simplified PIPELINERUN_FILE detection to troubleshoot.
+
+# Exit immediately if a command exits with a non-zero status.
 set -e
 
 # --- Colors for Output ---
@@ -55,10 +64,30 @@ else
     echo -e "${GREEN}Tekton Pipelines installed successfully.${NC}"
 fi
 
+# --- ADDING WAITING TIME FOR WEBHOOK TO BE READY ---
+echo -e "\n${BLUE}STEP 1: Waiting for Tekton Webhook to be ready...${NC}"
+kubectl wait \
+  --for=condition=available \
+  --timeout=300s \
+  deployment/tekton-pipelines-webhook \
+  -n tekton-pipelines
+echo -e "${GREEN}Tekton Webhook ready.${NC}"
+
+echo -e "\n${BLUE}STEP 1: Setting Pod Security Admission to Privileged for Tekton namespace...${NC}"
+kubectl label namespace "$NAMESPACE" \
+  pod-security.kubernetes.io/enforce=privileged \
+  pod-security.kubernetes.io/warn=privileged \
+  pod-security.kubernetes.io/audit=privileged \
+  --overwrite
+echo -e "${GREEN}Pod Security Admission policy set for '$NAMESPACE'.${NC}"
+# --- END NEW ADDITION ---
+
 
 echo -e "\n${BLUE}STEP 2: Applying prerequisites (RBAC, Tasks, Pipeline)...${NC}"
 # Find the PipelineRun file to exclude it from the first apply
-PIPELINERUN_FILE=$(awk '/kind: PipelineRun/{print FILENAME; exit}' "$PIPELINE_DIR"/*.yaml 2>/dev/null)
+# DEBUG FIX: Temporarily simplify PIPELINERUN_FILE detection to diagnose awk issue
+PIPELINERUN_FILE=$(grep -l 'kind: PipelineRun' "$PIPELINE_DIR"/*.yaml "$PIPELINE_DIR"/*.yml | head -n 1)
+
 
 if [ -z "$PIPELINERUN_FILE" ]; then
   echo -e "${RED}Fatal: Could not find a file with 'kind: PipelineRun' in '$PIPELINE_DIR'.${NC}"
@@ -75,8 +104,9 @@ echo -e "\n${BLUE}STEP 3: Applying the PipelineRun to start execution...${NC}"
 echo "(Waiting 5 seconds for permissions to apply...)"
 sleep 5
 
-# Delete the pipelinerun if it exists, to ensure a fresh run
-PIPELINERUN_NAME=$(awk '/kind: PipelineRun/{f=1} f && /name:/{print $2; exit}' "$PIPELINERUN_FILE" 2>/dev/null)
+# NEW, SIMPLER, MORE ROBUST WAY TO GET PIPELINERUN_NAME
+PIPELINERUN_NAME=$(grep -A 2 'kind: PipelineRun' "$PIPELINERUN_FILE" | grep 'name:' | awk '{print $2}' | head -n 1)
+
 echo "Deleting previous run of '$PIPELINERUN_NAME' to ensure a fresh start..."
 kubectl delete pipelinerun "$PIPELINERUN_NAME" -n "$NAMESPACE" --ignore-not-found=true
 
