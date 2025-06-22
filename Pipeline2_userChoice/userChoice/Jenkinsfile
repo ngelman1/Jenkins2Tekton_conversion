@@ -14,10 +14,12 @@ pipeline {
     stages {
 
 
+
+
         stage('Get User Transformation Choice') {
             steps {
                 script {
-                    def rawInputResult = input( // Renamed variable to avoid confusion
+                    def rawInputResult = input(
                         id: 'getChoiceInput',
                         message: 'Select a transformation to apply:',
                         parameters: [
@@ -28,30 +30,19 @@ pipeline {
                             )
                         ]
                     )
-                    // --- NEW DIAGNOSTIC LINES ---
                     echo "DIAGNOSTIC: Raw input result: '${rawInputResult}'"
                     echo "DIAGNOSTIC: Type of rawInputResult: ${rawInputResult.getClass()}"
-                    // --- END NEW DIAGNOSTIC LINES ---
 
-                    // Attempt to cast to map to make sure
-                    def inputMap = rawInputResult as Map
+                    // --- THIS IS THE FINAL FIX ---
+                    env.USER_TRANSFORMATION_CHOICE = rawInputResult // Directly assign the string
+                    // --- END FINAL FIX ---
 
-                    if (inputMap.containsKey('TRANSFORMATION_TYPE')) { // Safely check for key
-                        env.USER_TRANSFORMATION_CHOICE = inputMap['TRANSFORMATION_TYPE']
-                        echo "User chose (from map): '${env.USER_TRANSFORMATION_CHOICE}'"
-                    } else {
-                        // Fallback if it's not a map or doesn't contain the key,
-                        // perhaps the choice value itself is the rawInputResult if no parameters used?
-                        // This indicates a deeper problem with input step itself.
-                        env.USER_TRANSFORMATION_CHOICE = rawInputResult.toString() // Fallback to raw string
-                        echo "User chose (fallback from raw): '${env.USER_TRANSFORMATION_CHOICE}'"
-                    }
+                    echo "User chose: '${env.USER_TRANSFORMATION_CHOICE}'"
 
                     echo "Initial string: '${env.PROCESSING_MESSAGE}'"
                 }
             }
         }
-
 
 
         stage('Apply Chosen Transformation') {
