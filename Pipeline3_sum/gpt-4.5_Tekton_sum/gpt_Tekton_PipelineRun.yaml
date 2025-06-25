@@ -1,7 +1,17 @@
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
-  generateName: process-numbers-run-
+  name: number-sum-run
 spec:
   pipelineRef:
-    name: process-numbers-pipeline
+    name: number-sum-pipeline
+  workspaces:
+    - name: shared
+      volumeClaimTemplate:
+        metadata:
+          name: shared-pvc
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 1Gi

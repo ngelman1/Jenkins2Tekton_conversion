@@ -1,27 +1,38 @@
 apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
-  name: process-numbers-pipeline
+  name: number-sum-pipeline
 spec:
+  workspaces:
+    - name: shared
   tasks:
-    - name: define-data
+    - name: define
       taskRef:
-        name: define-number-data
+        name: define-data
+      workspaces:
+        - name: shared
+          workspace: shared
 
-    - name: calculate-sum
-      runAfter: ["define-data"]
+    - name: calculate
+      runAfter: [define]
       taskRef:
         name: calculate-sum
-      params:
-        - name: number-string
-          value: $(tasks.define-data.results.number-string)
+      workspaces:
+        - name: shared
+          workspace: shared
 
-    - name: format-final
-      runAfter: ["calculate-sum"]
+    - name: format
+      runAfter: [calculate]
       taskRef:
         name: format-final-string
-      params:
-        - name: number-string
-          value: $(tasks.define-data.results.number-string)
-        - name: calculated-sum
-          value: $(tasks.calculate-sum.results.calculated-sum)
+      workspaces:
+        - name: shared
+          workspace: shared
+
+    - name: print
+      runAfter: [format]
+      taskRef:
+        name: print-final-result
+      workspaces:
+        - name: shared
+          workspace: shared

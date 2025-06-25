@@ -1,0 +1,15 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: print-final-result
+spec:
+  workspaces:
+    - name: shared
+  steps:
+    - name: print
+      image: alpine
+      script: |
+        #!/bin/sh
+        echo "--- Raw Final String for Cross-Platform SHA Hashing ---"
+        cat $(workspaces.shared.path)/final_result.txt
+        echo "--------------------------------------------------------"

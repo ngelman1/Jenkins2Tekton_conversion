@@ -1,17 +1,16 @@
 apiVersion: tekton.dev/v1
 kind: Task
 metadata:
-  name: define-number-data
+  name: define-data
 spec:
-  results:
-    - name: number-string
-      description: Comma-separated string of numbers
+  workspaces:
+    - name: shared
   steps:
-    - name: echo-input
-      image: ubuntu:latest
+    - name: define
+      image: alpine
       script: |
-        #!/bin/bash
+        #!/bin/sh
         echo "--- Input Number Data ---"
         echo "Numbers to process: 10,25,5,15,30"
         echo "-------------------------"
-        echo -n "10,25,5,15,30" > $(results.number-string.path)
+        echo "10,25,5,15,30" > $(workspaces.shared.path)/number_string.txt

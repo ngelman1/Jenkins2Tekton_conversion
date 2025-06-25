@@ -3,17 +3,15 @@ kind: Task
 metadata:
   name: format-final-string
 spec:
-  params:
-    - name: number-string
-    - name: calculated-sum
-  results:
-    - name: final-message
-      description: Formatted final result
+  workspaces:
+    - name: shared
   steps:
     - name: format
-      image: ubuntu:latest
+      image: alpine
       script: |
-        #!/bin/bash
-        formatted="Original Numbers: [$(params.number-string)] | Total Sum: $(params.calculated-sum)"
-        echo "Formatted String: $formatted"
-        echo -n "$formatted" > $(results.final-message.path)
+        #!/bin/sh
+        numbers=$(cat $(workspaces.shared.path)/number_string.txt)
+        sum=$(cat $(workspaces.shared.path)/calculated_sum.txt)
+        final="Original Numbers: [$numbers] | Total Sum: $sum"
+        echo "Formatted String: $final"
+        echo "$final" > $(workspaces.shared.path)/final_result.txt

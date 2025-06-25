@@ -3,22 +3,18 @@ kind: Task
 metadata:
   name: calculate-sum
 spec:
-  params:
-    - name: number-string
-      description: Comma-separated numbers
-  results:
-    - name: calculated-sum
-      description: The total sum
+  workspaces:
+    - name: shared
   steps:
     - name: sum
-      image: ubuntu:latest
+      image: alpine
       script: |
-        #!/bin/bash
-        numbers="$(params.number-string)"
+        #!/bin/sh
+        numbers=$(cat $(workspaces.shared.path)/number_string.txt)
+        echo "Calculating sum of: $numbers"
         sum=0
-        IFS=',' read -ra num_array <<< "$numbers"
-        for n in "${num_array[@]}"; do
+        IFS=','; for n in $numbers; do
           sum=$((sum + n))
         done
-        echo "Calculated Sum: $sum"
-        echo -n "$sum" > $(results.calculated-sum.path)
+        echo "DEBUG: Writing sum ($sum) to file"
+        echo "$sum" > $(workspaces.shared.path)/calculated_sum.txt
