@@ -1,15 +1,8 @@
-// This Pipeline processes a fixed string of numbers:
-// - Extracts the individual numbers.
-// - Calculates their sum.
-// - Formats the result into a final string.
-
 pipeline {
     agent any
 
     environment {
         NUMBER_STRING_DATA = "10,25,5,15,30"
-        CALCULATED_SUM = 0
-        FINAL_RESULT_STRING = ''
     }
 
     stages {
@@ -30,10 +23,10 @@ pipeline {
                     def numbers = env.NUMBER_STRING_DATA.split(',')
                     def sum = 0
                     numbers.each { num ->
-                        sum += num.toInteger() 
+                        sum += num.toInteger()
                     }
-                    env.CALCULATED_SUM = sum
-                    echo "Calculated Sum: ${env.CALCULATED_SUM}"
+                    echo "DEBUG: Writing sum (${sum}) to file"
+                    writeFile file: 'calculated_sum.txt', text: sum.toString()
                 }
             }
         }
@@ -41,9 +34,11 @@ pipeline {
         stage('Format Final String') {
             steps {
                 script {
-                    echo "Formatting final output string..."
-                    env.FINAL_RESULT_STRING = "Original Numbers: [${env.NUMBER_STRING_DATA}] | Total Sum: ${env.CALCULATED_SUM}"
-                    echo "Formatted String: ${env.FINAL_RESULT_STRING}"
+                    def sum = readFile('calculated_sum.txt').trim()
+                    echo "DEBUG: Read sum from file: ${sum}"
+                    def finalMessage = "Original Numbers: [${env.NUMBER_STRING_DATA}] | Total Sum: ${sum}"
+                    echo "Formatted String: ${finalMessage}"
+                    writeFile file: 'final_result.txt', text: finalMessage
                 }
             }
         }
@@ -53,9 +48,9 @@ pipeline {
         always {
             script {
                 echo "--- Raw Final String for Cross-Platform SHA Hashing ---"
-                echo "${env.FINAL_RESULT_STRING}"
-                echo "------------------------------------------------------"
-
+                def result = readFile('final_result.txt').trim()
+                echo "${result}"
+                echo "--------------------------------------------------------"
             }
         }
     }
