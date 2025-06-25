@@ -1,40 +1,28 @@
 apiVersion: tekton.dev/v1
 kind: Task
 metadata:
-  name: apply-transformation
+  name: transform-message-task
 spec:
   params:
-    - name: transformation
+    - name: case-option
       type: string
-    - name: input-message
-      type: string
-  results:
-    - name: output-message
   steps:
     - name: transform
-      image: ubuntu:latest
+      image: python:3.11-slim
       script: |
-        #!/bin/bash
+        #!/usr/bin/env python3
+        import os
 
-        set -e
+        message = "The quick brown fox jumps over the lazy dog."
+        choice = os.environ.get("CASE_OPTION", "lowercase")
 
-        transformation="$(params.transformation)"
-        input="$(params.input-message)"
+        if choice == "uppercase":
+            transformed = message.upper()
+        else:
+            transformed = message.lower()
 
-        echo "Transformation chosen: $transformation"
-        echo "Original message: $input"
-
-        result=""
-
-        if [ "$transformation" = "Uppercase" ]; then
-          result=$(echo "$input" | tr '[:lower:]' '[:upper:]')
-        elif [ "$transformation" = "Reverse Words" ]; then
-          result=$(echo "$input" | awk '{ for(i=NF;i>0;i--) printf("%s ", $i); print "" }')
-        elif [ "$transformation" = "CamelCase" ]; then
-          result=$(echo "$input" | sed -E 's/(^| )([a-z])/\U\2/g' | tr -d ' ')
-        else
-          result="ERROR: Unknown transformation '$transformation'."
-        fi
-
-        echo "Transformed message: $result"
-        echo -n "$result" > $(results.output-message.path)
+        print("Transformed Message:")
+        print(transformed)
+      env:
+        - name: CASE_OPTION
+          value: "$(params.case-option)"

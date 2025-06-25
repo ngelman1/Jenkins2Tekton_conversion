@@ -1,28 +1,17 @@
 apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
-  name: string-transform-pipeline
+  name: message-transform-pipeline
 spec:
   params:
-    - name: transformation
+    - name: case-option
       type: string
-    - name: input-message
-      type: string
-      default: "The quick brown fox jumps over the lazy dog."
+      description: "Choose how to transform the message"
+      default: lowercase
   tasks:
-    - name: apply-transformation
+    - name: transform-message
       taskRef:
-        name: apply-transformation
+        name: transform-message-task
       params:
-        - name: transformation
-          value: $(params.transformation)
-        - name: input-message
-          value: $(params.input-message)
-
-  finally:
-    - name: show-final-message
-      taskRef:
-        name: show-final-message
-      params:
-        - name: final-message
-          value: $(tasks.apply-transformation.results.output-message)
+        - name: case-option
+          value: $(params.case-option)
