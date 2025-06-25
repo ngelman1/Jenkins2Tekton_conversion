@@ -1,96 +1,94 @@
-//This Pipeline takes an input from the user and will perform some action on the string accordingly.
-// The final string to run sha on will be directly from the "Apply Chosen Transformation" stage.
 
 pipeline {
     agent any
 
     environment {
-        // Variable to hold the user's choice from the dropdown
-        USER_TRANSFORMATION_CHOICE = ''
-        // Variable for the message that will be processed
-        PROCESSING_MESSAGE = 'The quick brown fox jumps over the lazy dog.' // Start with a fixed initial string
+        INITIAL_MESSAGE = 'The quick brown fox jumps over the lazy dog.'
+        TRANSFORMED_MESSAGE = '' // This will hold the string as it gets processed
+        USER_CHOICE = '' // This will hold the user's selected transformation
     }
 
     stages {
-
-
+        // Stage 1: Get the user's choice for transformation
         stage('Get User Transformation Choice') {
             steps {
                 script {
-                    def rawInputResult = input(
-                        id: 'getChoiceInput',
+                    // Use the input step to present a choice to the user
+                    def chosenValue = input(
+                        id: 'getTransformChoice', // Unique ID for this input
                         message: 'Select a transformation to apply:',
                         parameters: [
                             choice(
-                                name: 'TRANSFORMATION_TYPE',
-                                choices: ['Uppercase', 'Reverse Words', 'CamelCase'],
+                                name: 'TRANSFORMATION_TYPE', // Name of the parameter
+                                choices: ['Uppercase', 'Reverse Words', 'CamelCase'], 
                                 description: 'Choose how to transform the string.'
                             )
                         ]
                     )
-                    echo "DIAGNOSTIC: Raw input result: '${rawInputResult}'"
-                    echo "DIAGNOSTIC: Type of rawInputResult: ${rawInputResult.getClass()}"
-
-                
-                    env.USER_TRANSFORMATION_CHOICE = rawInputResult.toString()
                     
+                    sh "export USER_CHOICE='${chosenValue}'"
 
-                    echo "User chose: '${env.USER_TRANSFORMATION_CHOICE}'"
+                    echo "User chose: '${env.USER_CHOICE}'"
+                    echo "Initial string for processing: '${env.INITIAL_MESSAGE}'"
 
-                    echo "Initial string: '${env.PROCESSING_MESSAGE}'"
+                    // Initialize the TRANSFORMED_MESSAGE with the initial string
+                    env.TRANSFORMED_MESSAGE = env.INITIAL_MESSAGE
                 }
             }
         }
 
-
-
+        // Stage 2: Apply the chosen transformation
         stage('Apply Chosen Transformation') {
             steps {
                 script {
-                    def currentMessage = env.PROCESSING_MESSAGE
-                    def choice = env.USER_TRANSFORMATION_CHOICE
+                    def currentMessage = env.TRANSFORMED_MESSAGE
+                    def choice = env.USER_CHOICE
 
                     echo "Applying transformation '${choice}' to string: '${currentMessage}'"
 
-                    // Conditional logic based on the user's dropdown choice
+                    // Conditional logic based on the user's choice
                     if (choice == 'Uppercase') {
-                        env.PROCESSING_MESSAGE = currentMessage.toUpperCase()
-                        echo "String after Uppercase: ${env.PROCESSING_MESSAGE}"
+                        env.TRANSFORMED_MESSAGE = currentMessage.toUpperCase()
+                        echo "String after Uppercase: ${env.TRANSFORMED_MESSAGE}"
                     } else if (choice == 'Reverse Words') {
-                        // Split by space, reverse the order of words, then join back
+                        // Split the string by spaces, reverse the list of words, then join them back
                         def words = currentMessage.split(' ')
-                        env.PROCESSING_MESSAGE = words.reverse().join(' ')
-                        echo "String after Reverse Words: ${env.PROCESSING_MESSAGE}"
+                        env.TRANSFORMED_MESSAGE = words.reverse().join(' ')
+                        echo "String after Reverse Words: ${env.TRANSFORMED_MESSAGE}"
                     } else if (choice == 'CamelCase') {
-                        // Simple CamelCase: Capitalize the first letter of each word and remove spaces
+                        // Capitalize the first letter of each word and remove spaces
                         def words = currentMessage.split(' ')
                         def camelCaseWords = []
                         words.each { word ->
-                            if (word) { // Ensure word is not empty
+                            if (word) { // Ensure the word is not empty
                                 camelCaseWords.add(word.capitalize())
                             }
                         }
-                        env.PROCESSING_MESSAGE = camelCaseWords.join('')
-                        echo "String after CamelCase: ${env.PROCESSING_MESSAGE}"
+                        env.TRANSFORMED_MESSAGE = camelCaseWords.join('')
+                        echo "String after CamelCase: ${env.TRANSFORMED_MESSAGE}"
                     } else {
                         // Fallback for an unexpected choice (should not happen with 'choice' parameter)
-                        env.PROCESSING_MESSAGE = "ERROR: Unknown choice '${choice}'. Original string: '${currentMessage}'"
-                        echo "String after Error: ${env.PROCESSING_MESSAGE}"
+                        env.TRANSFORMED_MESSAGE = "ERROR: Unknown choice '${choice}'. Original string: '${currentMessage}'"
+                        echo "String after Error: ${env.TRANSFORMED_MESSAGE}"
                     }
                 }
             }
         }
 
+        // Stage 3: Print the final transformed string
+        stage('Print Final String') {
+            steps {
+                echo "--- Final Transformed String ---"
+                echo "${env.TRANSFORMED_MESSAGE}"
+                echo "--------------------------------"
+            }
+        }
     }
-
+    
+    // You can also use a post block to always print the final message
     post {
         always {
-            script {
-                echo "--- Raw Final String for Cross-Platform SHA Hashing ---"
-                echo "${env.PROCESSING_MESSAGE}"
-                echo "------------------------------------------------------"
-
-            }
+            echo "Pipeline finished. Final message was: '${env.TRANSFORMED_MESSAGE}'"
         }
     }
 }
