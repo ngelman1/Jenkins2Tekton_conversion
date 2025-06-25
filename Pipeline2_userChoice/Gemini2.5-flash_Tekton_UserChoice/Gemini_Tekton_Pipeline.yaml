@@ -1,42 +1,31 @@
+# message-transformation-pipeline.yaml
 apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
-  name: string-transformation-pipeline
+  name: message-transformation-pipeline
 spec:
   params:
-    - name: chosen-transformation
-      description: The transformation selected by the user.
+    - name: CASE_OPTION
+      description: 'Choose how to transform the message: uppercase or lowercase'
       type: string
-      default: "Uppercase" # A default for convenience, or you can require it to be set by the PipelineRun
-      # Tekton doesn't have native dropdown, so we'll rely on PipelineRun param validation
-      # In a real scenario, you might have a custom controller or UI to enforce allowed values.
+      default: "uppercase" # Default choice from Jenkins
+      # In Tekton, you'd typically handle choices via documentation or external validation
+      # allowedValues: ["uppercase", "lowercase"] # Not standard Tekton syntax, for documentation only
+
+    - name: DEFAULT_MESSAGE
+      description: The default message to be transformed.
+      type: string
+      default: "The quick brown fox jumps over the lazy dog." # Default from Jenkins environment
 
   tasks:
-    - name: apply-user-transformation
+    - name: apply-transformation-step
       taskRef:
-        name: transform-string-task
+        name: apply-transformation-task # References the standalone Task definition
       params:
-        - name: user-transformation-choice
-          value: $(params.chosen-transformation)
-        # initial-message will use its default in the task, or you could pass it explicitly:
-        # - name: initial-message
-        #   value: "Your custom starting text"
+        - name: default-message
+          value: $(params.DEFAULT_MESSAGE) # Pass PipelineParam to TaskParam
+        - name: case-option
+          value: $(params.CASE_OPTION) # Pass PipelineParam to TaskParam
 
-  finally:
-    - name: print-final-output
-      taskSpec:
-        params:
-          - name: message-to-hash
-            description: The final processed string for hashing.
-            type: string
-        steps:
-          - name: echo-output
-            image: ubuntu:latest # Or any image with 'echo'
-            script: |
-              #!/usr/bin/env bash
-              echo "--- Raw Final String for Cross-Platform SHA Hashing ---"
-              echo "$(params.message-to-hash)"
-              echo "------------------------------------------------------"
-      params:
-        - name: message-to-hash
-          value: $(tasks.apply-user-transformation.results.final-processed-string)
+  # No explicit 'post' equivalent needed here since the Jenkinsfile only had 'echo' in post.always.
+  # If there were more complex post-actions, a 'finally' block would be used.

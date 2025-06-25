@@ -1,70 +1,42 @@
+# apply-transformation-task.yaml
 apiVersion: tekton.dev/v1
 kind: Task
 metadata:
-  name: transform-string-task
+  name: apply-transformation-task
 spec:
   params:
-    - name: user-transformation-choice
-      description: The transformation chosen by the user (Uppercase, Reverse Words, CamelCase).
+    - name: default-message
+      description: The base message to transform.
       type: string
-    - name: initial-message
-      description: The starting string to be transformed.
+      default: "The quick brown fox jumps over the lazy dog." # Default from Jenkins env
+    - name: case-option
+      description: 'Choose how to transform the message: uppercase or lowercase'
       type: string
-      default: "The quick brown fox jumps over the lazy dog." # Matches Jenkins default
+      default: "uppercase" # Default from Jenkins choice parameter, picking one
+      # Tekton doesn't enforce 'choice' but you can document allowed values
+      # allowedValues: ["uppercase", "lowercase"] # This is just a comment, not enforced by Tekton spec
   results:
-    - name: final-processed-string
-      description: The string after applying the chosen transformation.
+    - name: final-message
+      description: The transformed message.
   steps:
-    - name: apply-transformation
-      image: bash:latest # Using a minimal bash image for string manipulation
+    - name: transform-message
+      image: bash:latest # Use a bash image for string manipulation
       script: |
         #!/usr/bin/env bash
-        set -euo pipefail
+        DEFAULT_MSG="$(params.default-message)"
+        CASE_OPT="$(params.case-option)"
+        TRANSFORMED_MSG=""
 
-        CHOICE="$(params.user-transformation-choice)"
-        INITIAL_MESSAGE="$(params.initial-message)"
-        PROCESSED_MESSAGE="${INITIAL_MESSAGE}"
+        echo "Applying transformation based on option: ${CASE_OPT}"
 
-        echo "Applying transformation '${CHOICE}' to string: '${INITIAL_MESSAGE}'"
+        if [[ "${CASE_OPT}" == "uppercase" ]]; then
+          TRANSFORMED_MSG=$(echo "${DEFAULT_MSG}" | tr '[:lower:]' '[:upper:]')
+        elif [[ "${CASE_OPT}" == "lowercase" ]]; then
+          TRANSFORMED_MSG=$(echo "${DEFAULT_MSG}" | tr '[:upper:]' '[:lower:]')
+        else
+          TRANSFORMED_MSG="${DEFAULT_MSG}" # fallback
+        fi
 
-        case "${CHOICE}" in
-          "Uppercase")
-            PROCESSED_MESSAGE=$(echo -n "${INITIAL_MESSAGE}" | tr '[:lower:]' '[:upper:]')
-            echo "String after Uppercase: ${PROCESSED_MESSAGE}"
-            ;;
-          "Reverse Words")
-            # Bash doesn't have easy string reversal.
-            # We'll split, put into an array, reverse array elements, then join.
-            # This is a bit more complex in pure bash.
-            read -ra words <<< "${INITIAL_MESSAGE}"
-            REVERSED_WORDS=""
-            for (( i=${#words[@]}-1; i>=0; i-- )); do
-                REVERSED_WORDS+="${words[i]} "
-            done
-            PROCESSED_MESSAGE="${REVERSED_WORDS% }" # Remove trailing space
-            echo "String after Reverse Words: ${PROCESSED_MESSAGE}"
-            ;;
-          "CamelCase")
-            # CamelCase in bash is also not trivial.
-            # We'll use awk to capitalize first letter of each word and remove spaces.
-            # This approach assumes words are space-separated.
-            PROCESSED_MESSAGE=$(echo "${INITIAL_MESSAGE}" | awk '{
-              output = ""
-              for (i=1; i<=NF; i++) {
-                word = $i
-                if (word != "") {
-                  output = output toupper(substr(word,1,1)) tolower(substr(word,2))
-                }
-              }
-              print output
-            }')
-            echo "String after CamelCase: ${PROCESSED_MESSAGE}"
-            ;;
-          *)
-            PROCESSED_MESSAGE="ERROR: Unknown choice '${CHOICE}'. Original string: '${INITIAL_MESSAGE}'"
-            echo "String after Error: ${PROCESSED_MESSAGE}"
-            ;;
-        esac
-
-        # Output the final processed message as a Task result
-        echo -n "${PROCESSED_MESSAGE}" > "$(results.final-processed-string.path)"
+        echo "Transformed Message: ${TRANSFORMED_MSG}"
+        # Write the transformed message to the TaskResult path
+        echo -n "${TRANSFORMED_MSG}" > "$(results.final-message.path)"

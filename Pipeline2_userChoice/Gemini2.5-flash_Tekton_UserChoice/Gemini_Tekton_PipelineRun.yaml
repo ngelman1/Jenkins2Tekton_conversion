@@ -1,10 +1,11 @@
+# uppercase-run.yaml
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
-  generateName: transform-uppercase-run-
+  name: uppercase-message-run
 spec:
   pipelineRef:
-    name: string-transformation-pipeline
+    name: message-transformation-pipeline
   params:
-    - name: chosen-transformation
-      value: "Uppercase" # User's choice from the 'dropdown'
+    - name: CASE_OPTION
+      value: "uppercase" # Overrides default, forces uppercase
