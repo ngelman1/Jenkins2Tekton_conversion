@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
 
@@ -9,35 +8,33 @@ pipeline {
     }
 
     stages {
-        // Stage 1: Get the user's choice for transformation
         stage('Get User Transformation Choice') {
             steps {
                 script {
-                    // Use the input step to present a choice to the user
                     def chosenValue = input(
-                        id: 'getTransformChoice', // Unique ID for this input
+                        id: 'getTransformChoice',
                         message: 'Select a transformation to apply:',
                         parameters: [
                             choice(
-                                name: 'TRANSFORMATION_TYPE', // Name of the parameter
-                                choices: ['Uppercase', 'Reverse Words', 'CamelCase'], 
+                                name: 'TRANSFORMATION_TYPE',
+                                choices: ['Uppercase', 'Lowercase'], // Simplified choices
                                 description: 'Choose how to transform the string.'
                             )
                         ]
                     )
-                    
-                    sh "export USER_CHOICE='${chosenValue}'"
+
+                    // This captures the output of the shell command and assigns it to env.USER_CHOICE
+                    env.USER_CHOICE = sh(returnStdout: true, script: "echo '${chosenValue}'").trim()
 
                     echo "User chose: '${env.USER_CHOICE}'"
                     echo "Initial string for processing: '${env.INITIAL_MESSAGE}'"
-
-                    // Initialize the TRANSFORMED_MESSAGE with the initial string
+                    
+                    // Initialize TRANSFORMED_MESSAGE with the initial string
                     env.TRANSFORMED_MESSAGE = env.INITIAL_MESSAGE
                 }
             }
         }
 
-        // Stage 2: Apply the chosen transformation
         stage('Apply Chosen Transformation') {
             steps {
                 script {
@@ -46,28 +43,14 @@ pipeline {
 
                     echo "Applying transformation '${choice}' to string: '${currentMessage}'"
 
-                    // Conditional logic based on the user's choice
                     if (choice == 'Uppercase') {
                         env.TRANSFORMED_MESSAGE = currentMessage.toUpperCase()
                         echo "String after Uppercase: ${env.TRANSFORMED_MESSAGE}"
-                    } else if (choice == 'Reverse Words') {
-                        // Split the string by spaces, reverse the list of words, then join them back
-                        def words = currentMessage.split(' ')
-                        env.TRANSFORMED_MESSAGE = words.reverse().join(' ')
-                        echo "String after Reverse Words: ${env.TRANSFORMED_MESSAGE}"
-                    } else if (choice == 'CamelCase') {
-                        // Capitalize the first letter of each word and remove spaces
-                        def words = currentMessage.split(' ')
-                        def camelCaseWords = []
-                        words.each { word ->
-                            if (word) { // Ensure the word is not empty
-                                camelCaseWords.add(word.capitalize())
-                            }
-                        }
-                        env.TRANSFORMED_MESSAGE = camelCaseWords.join('')
-                        echo "String after CamelCase: ${env.TRANSFORMED_MESSAGE}"
+                    } else if (choice == 'Lowercase') { // Added Lowercase option
+                        env.TRANSFORMED_MESSAGE = currentMessage.toLowerCase()
+                        echo "String after Lowercase: ${env.TRANSFORMED_MESSAGE}"
                     } else {
-                        // Fallback for an unexpected choice (should not happen with 'choice' parameter)
+                        // Fallback for unexpected choice
                         env.TRANSFORMED_MESSAGE = "ERROR: Unknown choice '${choice}'. Original string: '${currentMessage}'"
                         echo "String after Error: ${env.TRANSFORMED_MESSAGE}"
                     }
@@ -75,7 +58,6 @@ pipeline {
             }
         }
 
-        // Stage 3: Print the final transformed string
         stage('Print Final String') {
             steps {
                 echo "--- Final Transformed String ---"
@@ -85,7 +67,6 @@ pipeline {
         }
     }
     
-    // You can also use a post block to always print the final message
     post {
         always {
             echo "Pipeline finished. Final message was: '${env.TRANSFORMED_MESSAGE}'"
