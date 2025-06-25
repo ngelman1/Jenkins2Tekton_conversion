@@ -2,74 +2,32 @@ pipeline {
     agent any
 
     environment {
-        INITIAL_MESSAGE = 'The quick brown fox jumps over the lazy dog.'
-        TRANSFORMED_MESSAGE = '' // This will hold the string as it gets processed
-        USER_CHOICE = '' // This will hold the user's selected transformation
+        DEFAULT_MESSAGE = "The quick brown fox jumps over the lazy dog."
+        FINAL_MESSAGE = ""
+    }
+
+    parameters {
+        choice(
+            name: 'CASE_OPTION',
+            choices: ['uppercase', 'lowercase'],
+            description: 'Choose how to transform the message'
+        )
     }
 
     stages {
-        stage('Get User Transformation Choice') {
+        stage('Apply Transformation') {
             steps {
                 script {
-                    def chosenValue = input(
-                        id: 'getTransformChoice',
-                        message: 'Select a transformation to apply:',
-                        parameters: [
-                            choice(
-                                name: 'TRANSFORMATION_TYPE',
-                                choices: ['Uppercase', 'Lowercase'], // Simplified choices
-                                description: 'Choose how to transform the string.'
-                            )
-                        ]
-                    )
-
-                    // This captures the output of the shell command and assigns it to env.USER_CHOICE
-                    env.USER_CHOICE = sh(returnStdout: true, script: "echo '${chosenValue}'").trim()
-
-                    echo "User chose: '${env.USER_CHOICE}'"
-                    echo "Initial string for processing: '${env.INITIAL_MESSAGE}'"
-                    
-                    // Initialize TRANSFORMED_MESSAGE with the initial string
-                    env.TRANSFORMED_MESSAGE = env.INITIAL_MESSAGE
-                }
-            }
-        }
-
-        stage('Apply Chosen Transformation') {
-            steps {
-                script {
-                    def currentMessage = env.TRANSFORMED_MESSAGE
-                    def choice = env.USER_CHOICE
-
-                    echo "Applying transformation '${choice}' to string: '${currentMessage}'"
-
-                    if (choice == 'Uppercase') {
-                        env.TRANSFORMED_MESSAGE = currentMessage.toUpperCase()
-                        echo "String after Uppercase: ${env.TRANSFORMED_MESSAGE}"
-                    } else if (choice == 'Lowercase') { // Added Lowercase option
-                        env.TRANSFORMED_MESSAGE = currentMessage.toLowerCase()
-                        echo "String after Lowercase: ${env.TRANSFORMED_MESSAGE}"
+                    if (params.CASE_OPTION == 'uppercase') {
+                        FINAL_MESSAGE = DEFAULT_MESSAGE.toUpperCase()
+                    } else if (params.CASE_OPTION == 'lowercase') {
+                        FINAL_MESSAGE = DEFAULT_MESSAGE.toLowerCase()
                     } else {
-                        // Fallback for unexpected choice
-                        env.TRANSFORMED_MESSAGE = "ERROR: Unknown choice '${choice}'. Original string: '${currentMessage}'"
-                        echo "String after Error: ${env.TRANSFORMED_MESSAGE}"
+                        FINAL_MESSAGE = DEFAULT_MESSAGE // fallback
                     }
+                    echo "Transformed Message: ${FINAL_MESSAGE}"
                 }
             }
-        }
-
-        stage('Print Final String') {
-            steps {
-                echo "--- Final Transformed String ---"
-                echo "${env.TRANSFORMED_MESSAGE}"
-                echo "--------------------------------"
-            }
-        }
-    }
-    
-    post {
-        always {
-            echo "Pipeline finished. Final message was: '${env.TRANSFORMED_MESSAGE}'"
         }
     }
 }
