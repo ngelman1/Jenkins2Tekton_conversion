@@ -1,16 +1,15 @@
-apiVersion: tekton.dev/v1
+apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
   name: number-sum-run
 spec:
   pipelineRef:
     name: number-sum-pipeline
+  serviceAccountName: pipeline-runner 
   workspaces:
-    - name: shared
+    - name: shared 
       volumeClaimTemplate:
-        metadata:
-          name: shared-pvc
-        spec:
+        spec: 
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
