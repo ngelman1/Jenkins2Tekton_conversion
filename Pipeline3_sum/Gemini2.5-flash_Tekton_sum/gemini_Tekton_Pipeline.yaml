@@ -1,0 +1,42 @@
+# jenkins-sum-pipeline.yaml
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: jenkins-sum-pipeline
+spec:
+  workspaces:
+    - name: shared # Define a shared workspace for tasks to use
+  tasks:
+    - name: define-data # First task
+      taskRef:
+        name: define-data-task # Refers to the Task defined in define-data-task.yaml
+      workspaces:
+        - name: shared
+          workspace: shared # Map to the pipeline's shared workspace
+
+    - name: calculate-sum # Second task, runs after define-data
+      taskRef:
+        name: calculate-sum-task # Refers to the Task defined in calculate-sum-task.yaml
+      runAfter:
+        - define-data # Ensures this task runs after 'define-data'
+      workspaces:
+        - name: shared
+          workspace: shared
+
+    - name: format-final-string # Third task, runs after calculate-sum
+      taskRef:
+        name: format-final-string-task # Refers to the Task defined in format-final-string-task.yaml
+      runAfter:
+        - calculate-sum # Ensures this task runs after 'calculate-sum'
+      workspaces:
+        - name: shared
+          workspace: shared
+
+    - name: print-final-result # Final task, runs after formatting
+      taskRef:
+        name: print-final-result-task # Refers to the Task defined in print-final-result-task.yaml
+      runAfter:
+        - format-final-string # Ensures this task runs after 'format-final-string'
+      workspaces:
+        - name: shared
+          workspace: shared

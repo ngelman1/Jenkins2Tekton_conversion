@@ -1,0 +1,24 @@
+# format-final-string-task.yaml
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: format-final-string-task
+spec:
+  workspaces:
+    - name: shared # This task uses the shared workspace to read data and write final result
+  steps:
+    - name: format-string
+      image: ubuntu:latest # Using ubuntu for bash features
+      script: |
+        #!/usr/bin/env bash
+        set -euo pipefail
+
+        # Read original numbers and sum from shared workspace
+        ORIGINAL_NUMBERS=$(cat /workspace/shared/numbers.txt)
+        SUM_VALUE=$(cat /workspace/shared/calculated_sum.txt)
+
+        echo "Formatting final output string..."
+        FINAL_STRING="Original Numbers: [${ORIGINAL_NUMBERS}] | Total Sum: ${SUM_VALUE}"
+        echo "Formatted String: ${FINAL_STRING}"
+        # Write the final message to a file in the shared workspace
+        echo -n "${FINAL_STRING}" > /workspace/shared/final_result.txt

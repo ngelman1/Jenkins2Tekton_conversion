@@ -1,0 +1,18 @@
+# print-final-result-task.yaml
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: print-final-result-task
+spec:
+  workspaces:
+    - name: shared # This task uses the shared workspace to read the final result
+  steps:
+    - name: echo-final-result
+      image: alpine:latest # Lightweight image for simple echo
+      script: |
+        #!/usr/bin/env sh
+        # Read the final result from the shared workspace
+        RESULT=$(cat /workspace/shared/final_result.txt)
+        echo "--- Raw Final String for Cross-Platform SHA Hashing ---"
+        echo "${RESULT}"
+        echo "--------------------------------------------------------"

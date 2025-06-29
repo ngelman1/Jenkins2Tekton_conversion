@@ -1,29 +1,30 @@
+# calculate-sum-task.yaml
 apiVersion: tekton.dev/v1
 kind: Task
 metadata:
-  name: format-result-task
+  name: calculate-sum-task
 spec:
-  params:
-    - name: original-numbers
-      description: The original comma-separated string of numbers.
-      type: string
-    - name: sum-value
-      description: The calculated sum.
-      type: string
-  results:
-    - name: final-formatted-string
-      description: The final string combining original numbers and sum.
+  workspaces:
+    - name: shared # This task uses the shared workspace to read numbers and write sum
   steps:
-    - name: format-string
-      image: ubuntu:latest 
+    - name: calculate-sum
+      image: ubuntu:latest # Using ubuntu for bash features
       script: |
         #!/usr/bin/env bash
         set -euo pipefail
 
-        ORIGINAL_NUMBERS="$(params.original-numbers)"
-        SUM_VALUE="$(params.sum-value)"
+        # Read the numbers from the shared workspace
+        INPUT_NUMBERS=$(cat /workspace/shared/numbers.txt)
+        SUM=0
 
-        echo "Formatting final output string..."
-        FINAL_STRING="Original Numbers: [${ORIGINAL_NUMBERS}] | Total Sum: ${SUM_VALUE}"
-        echo "Formatted String: ${FINAL_STRING}"
-        echo -n "${FINAL_STRING}" > "$(results.final-formatted-string.path)"
+        echo "Calculating sum of numbers from: ${INPUT_NUMBERS}"
+
+        # Split the string by comma and iterate
+        IFS=',' read -ra ADDR <<< "$INPUT_NUMBERS"
+        for i in "${ADDR[@]}"; do
+          SUM=$((SUM + i))
+        done
+
+        echo "Calculated Sum: ${SUM}"
+        # Write the sum to a file in the shared workspace
+        echo -n "${SUM}" > /workspace/shared/calculated_sum.txt

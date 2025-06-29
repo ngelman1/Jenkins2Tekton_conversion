@@ -1,7 +1,17 @@
-apiVersion: tekton.dev/v1
+# jenkins-sum-pipeline-run.yaml
+apiVersion: tekton.dev/v1beta1 # PipelineRuns are still v1beta1
 kind: PipelineRun
 metadata:
-  generateName: number-processing-run-
+  name: jenkins-sum-pipeline-run # Fixed name for the PipelineRun
 spec:
   pipelineRef:
-    name: number-processing-pipeline
+    name: jenkins-sum-pipeline # Refers to the Pipeline defined in jenkins-sum-pipeline.yaml
+  serviceAccountName: pipeline-runner # Use the ServiceAccount with permissions
+  workspaces:
+    - name: shared # This matches the workspace defined in the Pipeline
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 1Gi

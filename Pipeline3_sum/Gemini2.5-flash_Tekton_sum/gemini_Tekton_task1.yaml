@@ -1,32 +1,18 @@
+# define-data-task.yaml
 apiVersion: tekton.dev/v1
 kind: Task
 metadata:
-  name: calculate-sum-task
+  name: define-data-task
 spec:
-  params:
-    - name: numbers-string
-      description: The comma-separated string of numbers.
-      type: string
-  results:
-    - name: calculated-sum
-      description: The total sum of the numbers.
+  workspaces:
+    - name: shared # This task uses the shared workspace
   steps:
-    - name: calculate-sum
-      image: ubuntu:latest 
+    - name: set-initial-data
+      image: alpine:latest # Using a lightweight image for a simple shell command
       script: |
-        #!/usr/bin/env bash
-        set -euo pipefail
-
-        INPUT_NUMBERS="$(params.numbers-string)"
-        SUM=0
-
-        echo "Calculating sum of numbers from: ${INPUT_NUMBERS}"
-
-        # Split the string by comma and iterate
-        IFS=',' read -ra ADDR <<< "$INPUT_NUMBERS"
-        for i in "${ADDR[@]}"; do
-          SUM=$((SUM + i))
-        done
-
-        echo "Calculated Sum: ${SUM}"
-        echo -n "${SUM}" > "$(results.calculated-sum.path)"
+        #!/usr/bin/env sh
+        echo "--- Input Number Data ---"
+        echo "Numbers to process: 10,25,5,15,30"
+        echo "-------------------------"
+        # Write the numbers to a file in the shared workspace
+        echo "10,25,5,15,30" > /workspace/shared/numbers.txt
