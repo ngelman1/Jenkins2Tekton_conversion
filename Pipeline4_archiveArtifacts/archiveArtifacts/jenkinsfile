@@ -1,5 +1,5 @@
 pipeline {
-    agent any 
+    agent any  // Run on any available agent
 
     environment {
         ARTIFACT_DIR = 'output'  // Directory to store build artifacts
