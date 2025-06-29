@@ -1,0 +1,47 @@
+pipeline {
+    agent any 
+
+    environment {
+        ARTIFACT_DIR = 'output'  // Directory to store build artifacts
+    }
+
+    stages {
+        stage('Setup Workspace') {
+            steps {
+                echo '--- Setting up the workspace ---'
+                sh 'mkdir -p $ARTIFACT_DIR'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo '--- Simulating build ---'
+                // Simulate creating build output files
+                sh '''
+                    echo "Build file 1 content" > $ARTIFACT_DIR/build-file1.txt
+                    echo "Build file 2 content" > $ARTIFACT_DIR/build-file2.log
+                '''
+            }
+        }
+
+        stage('Archive Artifacts') {
+            steps {
+                echo '--- Archiving build artifacts ---'
+                archiveArtifacts artifacts: "${ARTIFACT_DIR}/*.*", fingerprint: true
+            }
+        }
+
+        stage('Clean Up') {
+            steps {
+                echo '--- Cleaning up workspace ---'
+                sh 'rm -rf $ARTIFACT_DIR'
+            }
+        }
+    }
+
+    post {
+        always {
+            echo '--- Build complete ---'
+        }
+    }
+}
