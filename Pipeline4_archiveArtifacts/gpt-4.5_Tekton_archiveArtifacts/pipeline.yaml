@@ -1,0 +1,42 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: build-artifact-pipeline
+spec:
+  params:
+    - name: ARTIFACT_DIR
+      default: output
+  workspaces:
+    - name: shared-data
+  tasks:
+    - name: setup-workspace
+      taskRef:
+        name: setup-workspace-task
+      params:
+        - name: ARTIFACT_DIR
+          value: $(params.ARTIFACT_DIR)
+      workspaces:
+        - name: shared-data
+          workspace: shared-data
+
+    - name: build-step
+      runAfter: [setup-workspace]
+      taskRef:
+        name: build-task
+      params:
+        - name: ARTIFACT_DIR
+          value: $(params.ARTIFACT_DIR)
+      workspaces:
+        - name: shared-data
+          workspace: shared-data
+
+    - name: archive-artifacts
+      runAfter: [build-step]
+      taskRef:
+        name: archive-task
+      params:
+        - name: ARTIFACT_DIR
+          value: $(params.ARTIFACT_DIR)
+      workspaces:
+        - name: shared-data
+          workspace: shared-data

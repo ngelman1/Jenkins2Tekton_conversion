@@ -1,0 +1,14 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: build-artifact-pipelinerun
+spec:
+  pipelineRef:
+    name: build-artifact-pipeline
+  params:
+    - name: ARTIFACT_DIR
+      value: output
+  workspaces:
+    - name: shared-data
+      persistentVolumeClaim:
+        claimName: my-artifact-pvc

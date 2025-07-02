@@ -1,0 +1,16 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: archive-task
+spec:
+  params:
+    - name: ARTIFACT_DIR
+  workspaces:
+    - name: shared-data
+  steps:
+    - name: archive
+      image: ubuntu
+      script: |
+        echo "--- Archiving build artifacts ---"
+        ls -l $(workspaces.shared-data.path)/$(params.ARTIFACT_DIR)
+        # Optionally, copy to cloud or tar/gzip here

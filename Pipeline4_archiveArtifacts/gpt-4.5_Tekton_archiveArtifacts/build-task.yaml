@@ -1,0 +1,16 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: build-task
+spec:
+  params:
+    - name: ARTIFACT_DIR
+  workspaces:
+    - name: shared-data
+  steps:
+    - name: build
+      image: ubuntu
+      script: |
+        echo "--- Simulating build ---"
+        echo "Build file 1 content" > $(workspaces.shared-data.path)/$(params.ARTIFACT_DIR)/build-file1.txt
+        echo "Build file 2 content" > $(workspaces.shared-data.path)/$(params.ARTIFACT_DIR)/build-file2.log

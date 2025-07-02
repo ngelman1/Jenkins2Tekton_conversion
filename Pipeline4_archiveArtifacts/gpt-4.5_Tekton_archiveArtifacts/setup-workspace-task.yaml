@@ -1,0 +1,15 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: setup-workspace-task
+spec:
+  params:
+    - name: ARTIFACT_DIR
+  workspaces:
+    - name: shared-data
+  steps:
+    - name: setup
+      image: ubuntu
+      script: |
+        echo "--- Setting up the workspace ---"
+        mkdir -p $(workspaces.shared-data.path)/$(params.ARTIFACT_DIR)
