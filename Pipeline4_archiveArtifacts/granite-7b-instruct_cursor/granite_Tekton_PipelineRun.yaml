@@ -1,0 +1,22 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: archive-artifacts-pipeline-run
+  annotations:
+    description: "PipelineRun to execute the archive artifacts pipeline"
+spec:
+  pipelineRef:
+    name: archive-artifacts-pipeline
+  serviceAccountName: tekton-pipeline-sa
+  params:
+    - name: artifact-dir
+      value: "output"
+  workspaces:
+    - name: shared-workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi 

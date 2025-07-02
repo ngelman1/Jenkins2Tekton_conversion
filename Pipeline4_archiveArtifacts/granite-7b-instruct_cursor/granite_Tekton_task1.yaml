@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: setup-workspace-task
+  annotations:
+    description: "Task to set up the workspace and create artifact directory"
+spec:
+  params:
+    - name: artifact-dir
+      description: "Directory to store build artifacts"
+      default: "output"
+  workspaces:
+    - name: workspace
+      description: "Workspace to set up"
+  steps:
+    - name: setup-workspace
+      image: alpine:latest
+      script: |
+        #!/bin/sh
+        echo "--- Setting up the workspace ---"
+        mkdir -p $(workspaces.workspace.path)/$(params.artifact-dir)
+        echo "Created artifact directory: $(workspaces.workspace.path)/$(params.artifact-dir)"
+        ls -la $(workspaces.workspace.path)/ 

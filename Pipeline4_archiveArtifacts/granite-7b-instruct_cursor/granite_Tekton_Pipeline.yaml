@@ -1,0 +1,57 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: archive-artifacts-pipeline
+  annotations:
+    description: "Tekton pipeline to simulate build process and archive artifacts"
+spec:
+  params:
+    - name: artifact-dir
+      description: "Directory to store build artifacts"
+      default: "output"
+  workspaces:
+    - name: shared-workspace
+      description: "Shared workspace for all tasks"
+  tasks:
+    - name: setup-workspace
+      taskRef:
+        name: setup-workspace-task
+      workspaces:
+        - name: workspace
+          workspace: shared-workspace
+      params:
+        - name: artifact-dir
+          value: $(params.artifact-dir)
+
+    - name: build
+      taskRef:
+        name: build-task
+      runAfter: ["setup-workspace"]
+      workspaces:
+        - name: workspace
+          workspace: shared-workspace
+      params:
+        - name: artifact-dir
+          value: $(params.artifact-dir)
+
+    - name: archive-artifacts
+      taskRef:
+        name: archive-artifacts-task
+      runAfter: ["build"]
+      workspaces:
+        - name: workspace
+          workspace: shared-workspace
+      params:
+        - name: artifact-dir
+          value: $(params.artifact-dir)
+
+    - name: clean-up
+      taskRef:
+        name: clean-up-task
+      runAfter: ["archive-artifacts"]
+      workspaces:
+        - name: workspace
+          workspace: shared-workspace
+      params:
+        - name: artifact-dir
+          value: $(params.artifact-dir) 

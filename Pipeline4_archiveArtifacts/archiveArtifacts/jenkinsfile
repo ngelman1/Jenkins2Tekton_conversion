@@ -1,8 +1,8 @@
 pipeline {
-    agent any  // Run on any available agent
+    agent any
 
     environment {
-        ARTIFACT_DIR = 'output'  // Directory to store build artifacts
+        ARTIFACT_DIR = 'output'
     }
 
     stages {
@@ -16,7 +16,6 @@ pipeline {
         stage('Build') {
             steps {
                 echo '--- Simulating build ---'
-                // Simulate creating build output files
                 sh '''
                     echo "Build file 1 content" > $ARTIFACT_DIR/build-file1.txt
                     echo "Build file 2 content" > $ARTIFACT_DIR/build-file2.log

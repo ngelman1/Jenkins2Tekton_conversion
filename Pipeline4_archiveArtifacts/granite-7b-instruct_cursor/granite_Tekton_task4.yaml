@@ -1,0 +1,25 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: clean-up-task
+  annotations:
+    description: "Task to clean up workspace after archiving"
+spec:
+  params:
+    - name: artifact-dir
+      description: "Directory to clean up"
+      default: "output"
+  workspaces:
+    - name: workspace
+      description: "Workspace to clean up"
+  steps:
+    - name: clean-up
+      image: alpine:latest
+      script: |
+        #!/bin/sh
+        echo "--- Cleaning up workspace ---"
+        echo "Removing artifact directory: $(workspaces.workspace.path)/$(params.artifact-dir)"
+        rm -rf $(workspaces.workspace.path)/$(params.artifact-dir)
+        echo "Workspace contents after cleanup:"
+        ls -la $(workspaces.workspace.path)/
+        echo "--- Build complete ---" 

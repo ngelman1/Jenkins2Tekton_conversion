@@ -1,0 +1,38 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: archive-artifacts-task
+  annotations:
+    description: "Task to archive build artifacts"
+spec:
+  params:
+    - name: artifact-dir
+      description: "Directory containing build artifacts"
+      default: "output"
+  workspaces:
+    - name: workspace
+      description: "Workspace containing build artifacts"
+  steps:
+    - name: archive-artifacts
+      image: alpine:latest
+      script: |
+        #!/bin/sh
+        echo "--- Archiving build artifacts ---"
+        # Create a timestamp for the archive
+        TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+        ARCHIVE_NAME="artifacts_${TIMESTAMP}.tar.gz"
+        
+        # Create archive of artifacts
+        cd $(workspaces.workspace.path)
+        tar -czf ${ARCHIVE_NAME} $(params.artifact-dir)/*
+        
+        echo "Artifacts archived as: ${ARCHIVE_NAME}"
+        echo "Archive contents:"
+        tar -tzf ${ARCHIVE_NAME}
+        
+        # Simulate fingerprinting (in real scenario, this would be stored in a persistent location)
+        echo "Archive fingerprint: $(sha256sum ${ARCHIVE_NAME} | cut -d' ' -f1)"
+        
+        # List all files in workspace
+        echo "Workspace contents after archiving:"
+        ls -la $(workspaces.workspace.path)/ 

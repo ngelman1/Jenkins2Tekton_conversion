@@ -1,0 +1,27 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: build-task
+  annotations:
+    description: "Task to simulate build process and create build artifacts"
+spec:
+  params:
+    - name: artifact-dir
+      description: "Directory to store build artifacts"
+      default: "output"
+  workspaces:
+    - name: workspace
+      description: "Workspace containing build artifacts"
+  steps:
+    - name: build
+      image: alpine:latest
+      script: |
+        #!/bin/sh
+        echo "--- Simulating build ---"
+        # Simulate creating build output files
+        echo "Build file 1 content" > $(workspaces.workspace.path)/$(params.artifact-dir)/build-file1.txt
+        echo "Build file 2 content" > $(workspaces.workspace.path)/$(params.artifact-dir)/build-file2.log
+        echo "Build artifacts created:"
+        ls -la $(workspaces.workspace.path)/$(params.artifact-dir)/
+        cat $(workspaces.workspace.path)/$(params.artifact-dir)/build-file1.txt
+        cat $(workspaces.workspace.path)/$(params.artifact-dir)/build-file2.log 
