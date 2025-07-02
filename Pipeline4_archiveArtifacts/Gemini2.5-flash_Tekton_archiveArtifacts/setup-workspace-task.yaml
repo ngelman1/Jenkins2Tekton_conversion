@@ -1,0 +1,13 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: setup-workspace-task
+spec:
+  workspaces:
+    - name: source
+  steps:
+    - name: setup-workspace
+      image: ubuntu:latest
+      script: |
+        #!/bin/bash
+        mkdir -p $(workspaces.source.path)/output 

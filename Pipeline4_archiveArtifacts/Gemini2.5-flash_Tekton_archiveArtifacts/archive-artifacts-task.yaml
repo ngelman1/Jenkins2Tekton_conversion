@@ -1,0 +1,14 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: archive-artifacts-task
+spec:
+  workspaces:
+    - name: source
+  steps:
+    - name: list-artifacts
+      image: ubuntu:latest
+      script: |
+        #!/bin/bash
+        echo "--- Listing archived artifacts in $(workspaces.source.path)/output ---"
+        ls -l $(workspaces.source.path)/output 

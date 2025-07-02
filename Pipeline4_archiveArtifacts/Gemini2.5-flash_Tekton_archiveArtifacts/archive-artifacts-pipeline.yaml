@@ -1,0 +1,38 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: archive-artifacts-pipeline
+spec:
+  workspaces:
+    - name: shared-workspace
+  tasks:
+    - name: setup-workspace
+      taskRef:
+        name: setup-workspace-task
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+    - name: build
+      taskRef:
+        name: build-task
+      runAfter:
+        - setup-workspace
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+    - name: archive-artifacts
+      taskRef:
+        name: archive-artifacts-task
+      runAfter:
+        - build
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+    - name: cleanup
+      taskRef:
+        name: cleanup-task
+      runAfter:
+        - archive-artifacts
+      workspaces:
+        - name: source
+          workspace: shared-workspace 

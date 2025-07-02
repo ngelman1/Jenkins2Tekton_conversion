@@ -1,0 +1,14 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: build-task
+spec:
+  workspaces:
+    - name: source
+  steps:
+    - name: simulate-build
+      image: ubuntu:latest
+      script: |
+        #!/bin/bash
+        echo "Build file 1 content" > $(workspaces.source.path)/output/build-file1.txt
+        echo "Build file 2 content" > $(workspaces.source.path)/output/build-file2.log 

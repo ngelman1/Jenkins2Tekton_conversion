@@ -1,0 +1,14 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: cleanup-task
+spec:
+  workspaces:
+    - name: source
+  steps:
+    - name: cleanup-workspace
+      image: ubuntu:latest
+      script: |
+        #!/bin/bash
+        echo "--- Cleaning up workspace ---"
+        rm -rf $(workspaces.source.path)/output 
