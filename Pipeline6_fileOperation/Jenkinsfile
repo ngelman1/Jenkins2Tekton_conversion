@@ -12,8 +12,8 @@ pipeline {
                 // to a new folder named 'backup'.
                 fileOperations([
                     fileCopyOperation(
-                        source: 'test.txt',
-                        destination: 'backup/'
+                        files: 'test.txt',
+                        destDir: 'backup/'
                     )
                 ])
 
