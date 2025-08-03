@@ -1,25 +1,12 @@
+// Jenkinsfile using the Build Timestamp plugin
+
 pipeline {
     agent any
 
     stages {
-        stage('Create and Copy File') {
+        stage('Show Build Timestamp') {
             steps {
-                // 1. Create a simple text file
-                sh 'echo "This is a test file." > test.txt'
-
-                // 2. Use the File Operations Plugin to copy the file
-                // This step copies 'test.txt' from the root of the workspace
-                // to a new folder named 'backup'.
-                script {
-                    fileOperations([
-                        fileCopyOperation(
-                            source: 'test.txt',
-                            destination: 'backup/'
-                        )
-                    ])
-                }
-                // 3. List the files to verify the copy
-                sh 'ls -R'
+                echo "The build started at: ${BUILD_TIMESTAMP}"
             }
         }
     }
