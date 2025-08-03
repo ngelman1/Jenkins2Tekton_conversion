@@ -1,0 +1,41 @@
+// Jenkinsfile (Declarative Pipeline)
+
+pipeline {
+    // Run the pipeline on any available agent.
+    agent any
+
+    // Define variables for the repository and branch.
+    environment {
+        REPO_URL = 'https://github.com/jenkinsci/git-plugin'
+        BRANCH_NAME = 'master'
+    }
+
+    // Define the steps of the pipeline.
+    stages {
+
+        // Stage 1: Clone the Git repository.
+        stage('Checkout Code') {
+            steps {
+                // Use the Git plugin's 'git' step to clone the repository.
+                git(url: env.REPO_URL, branch: env.BRANCH_NAME)
+            }
+        }
+
+        // Stage 2: Verify the repository was cloned.
+        stage('Verify Checkout') {
+            steps {
+                // Execute a shell command to list the contents of the workspace.
+                sh 'echo "Listing workspace contents:"'
+                sh 'ls -al'
+            }
+        }
+    }
+
+    // Define actions that run after the pipeline completes.
+    post {
+        // This block always runs, regardless of the build result.
+        always {
+            echo 'Pipeline finished.'
+        }
+    }
+}
