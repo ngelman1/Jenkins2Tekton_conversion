@@ -1,0 +1,13 @@
+// Jenkinsfile using the Build Timestamp plugin
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Show Build Timestamp') {
+            steps {
+                echo "The build started at: ${BUILD_TIMESTAMP}"
+            }
+        }
+    }
+}
