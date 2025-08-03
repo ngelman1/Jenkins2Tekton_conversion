@@ -7,7 +7,7 @@ pipeline {
     // Define variables for the repository and branch.
     environment {
         // The URL of your repository.
-        REPO_URL = 'https://github.com/ngelman1/Jenkins2Tekton_conversion.git'
+        REPO_URL = 'https://github.com/ngelman1/Jenkins2Tekton_conversion'
         BRANCH_NAME = 'master'
     }
 
