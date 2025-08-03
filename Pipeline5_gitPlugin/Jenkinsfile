@@ -6,7 +6,8 @@ pipeline {
 
     // Define variables for the repository and branch.
     environment {
-        REPO_URL = 'https://github.com/jenkinsci/git-plugin'
+        // The URL of your repository.
+        REPO_URL = 'https://github.com/ngelman1/Jenkins2Tekton_conversion.git'
         BRANCH_NAME = 'master'
     }
 
@@ -16,7 +17,7 @@ pipeline {
         // Stage 1: Clone the Git repository.
         stage('Checkout Code') {
             steps {
-                // Use the Git plugin's 'git' step to clone the repository.
+                // The 'git' step runs from the repository root, so no path changes are needed.
                 git(url: env.REPO_URL, branch: env.BRANCH_NAME)
             }
         }
@@ -25,8 +26,9 @@ pipeline {
         stage('Verify Checkout') {
             steps {
                 // Execute a shell command to list the contents of the workspace.
-                sh 'echo "Listing workspace contents:"'
-                sh 'ls -al'
+                // The path here is relative to the repository root.
+                sh 'echo "Listing contents of the Pipeline5_gitPlugin directory:"'
+                sh 'ls -al Pipeline5_gitPlugin/'
             }
         }
     }
