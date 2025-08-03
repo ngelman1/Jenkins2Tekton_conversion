@@ -10,13 +10,14 @@ pipeline {
                 // 2. Use the File Operations Plugin to copy the file
                 // This step copies 'test.txt' from the root of the workspace
                 // to a new folder named 'backup'.
-                fileOperations([
-                    fileCopyOperation(
-                        files: 'test.txt',
-                        destDir: 'backup/'
-                    )
-                ])
-
+                script {
+                    fileOperations([
+                        fileCopyOperation(
+                            source: 'test.txt',
+                            destination: 'backup/'
+                        )
+                    ])
+                }
                 // 3. List the files to verify the copy
                 sh 'ls -R'
             }
