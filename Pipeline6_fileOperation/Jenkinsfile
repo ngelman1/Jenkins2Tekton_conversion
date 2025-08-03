@@ -1,0 +1,25 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Create and Copy File') {
+            steps {
+                // 1. Create a simple text file
+                sh 'echo "This is a test file." > test.txt'
+
+                // 2. Use the File Operations Plugin to copy the file
+                // This step copies 'test.txt' from the root of the workspace
+                // to a new folder named 'backup'.
+                fileOperations([
+                    fileCopyOperation(
+                        source: 'test.txt',
+                        destination: 'backup/'
+                    )
+                ])
+
+                // 3. List the files to verify the copy
+                sh 'ls -R'
+            }
+        }
+    }
+}
