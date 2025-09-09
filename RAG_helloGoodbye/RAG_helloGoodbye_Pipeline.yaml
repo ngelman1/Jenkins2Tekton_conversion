@@ -1,0 +1,30 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: shared-variable-pipeline
+spec:
+  workspaces:
+    - name: pipeline-shared-data
+      description: Shared data across pipeline tasks.
+  tasks:
+    - name: create-message
+      taskRef:
+        name: create-greeting
+      workspaces:
+        - name: shared-data
+          workspace: pipeline-shared-data
+    - name: append-to-message
+      taskRef:
+        name: append-to-greeting
+      runAfter:
+        - create-message
+      workspaces:
+        - name: shared-data
+          workspace: pipeline-shared-data
+  finally:
+    - name: print-the-message
+      taskRef:
+        name: print-final-message
+      workspaces:
+        - name: shared-data
+          workspace: pipeline-shared-data

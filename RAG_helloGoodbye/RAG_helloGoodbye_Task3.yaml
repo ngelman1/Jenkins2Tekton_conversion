@@ -1,0 +1,18 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: print-final-message
+spec:
+  workspaces:
+    - name: shared-data
+      description: The workspace to read the final message from.
+  steps:
+    - name: print
+      image: ubuntu:latest
+      # image: bash:5.2
+      script: |
+        #!/bin/bash
+        set -e
+        finalMessage=$(cat $(workspaces.shared-data.path)/message)
+        echo "Final Message: ${finalMessage}"
+

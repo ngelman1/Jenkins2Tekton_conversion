@@ -1,0 +1,19 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: create-greeting
+spec:
+  workspaces:
+    - name: shared-data
+      description: The workspace to write the initial message to.
+  steps:
+    - name: create
+      image: ubuntu:latest
+      # image: bash:5.2
+      script: |
+        #!/bin/bash
+        set -e
+        finalMessage="Hello from Stage 1!"
+        echo "Stage 1 Message: ${finalMessage}"
+        echo -n "${finalMessage}" > $(workspaces.shared-data.path)/message
+

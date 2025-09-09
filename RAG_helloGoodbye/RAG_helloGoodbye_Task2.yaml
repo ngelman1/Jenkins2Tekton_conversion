@@ -1,0 +1,20 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: append-to-greeting
+spec:
+  workspaces:
+    - name: shared-data
+      description: The workspace to read and append the message to.
+  steps:
+    - name: append
+      image: ubuntu:latest     
+      # image: bash:5.2
+      script: |
+        #!/bin/bash
+        set -e
+        finalMessage=$(cat $(workspaces.shared-data.path)/message)
+        finalMessage+=" Goodbye from Stage 2!"
+        echo "Stage 2 Message: ${finalMessage}"
+        echo -n "${finalMessage}" > $(workspaces.shared-data.path)/message
+

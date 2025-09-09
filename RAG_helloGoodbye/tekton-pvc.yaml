@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: tekton-hostpath-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  volumeMode: Filesystem
+  hostPath:
+    path: /tmp/tekton-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tekton-shared-pvc
+  namespace: tekton-pipelines
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: tekton-hostpath-pv
+  storageClassName: standard
